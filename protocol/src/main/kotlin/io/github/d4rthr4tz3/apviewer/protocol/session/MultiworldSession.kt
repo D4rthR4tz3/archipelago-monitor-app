@@ -22,6 +22,8 @@ data class SlotConfig(
     val name: String,
     /** Overrides the room password for this slot if not empty. */
     val password: String = "",
+    /** Whether items for and from this slot are highlighted in the feed. */
+    val highlight: Boolean = true,
 )
 
 /** A multiworld room and the user's slots in it. */
@@ -68,7 +70,7 @@ class MultiworldSession(
                 slotName = slot.name,
                 password = slot.password.ifEmpty { config.roomPassword },
                 receivesText = index == 0,
-                ownSlotNames = config.slots.map { it.name }.toSet(),
+                ownSlotNames = config.slots.filter { it.highlight }.map { it.name }.toSet(),
             ),
             itemIndexStore = itemIndexStore,
             dataPackageCache = dataPackageCache,

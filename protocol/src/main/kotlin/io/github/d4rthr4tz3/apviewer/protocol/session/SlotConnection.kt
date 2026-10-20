@@ -46,7 +46,10 @@ class SlotConnection(
     private val _state = MutableStateFlow<SlotState>(SlotState.Idle)
     private val _messages = MutableSharedFlow<FeedMessage>()
     private val _receivedItems = MutableSharedFlow<ReceivedItem>()
+    private val _lastReportedIndex = MutableStateFlow<Int?>(null)
     private var job: Job? = null
+
+    @Volatile private var session: Session? = null
 
     @Volatile private var socket: PacketSocket? = null
 
@@ -58,6 +61,12 @@ class SlotConnection(
 
     /** Items the slot received, on every connection, with [ReceivedItem.isNew] for new ones. */
     val receivedItems: SharedFlow<ReceivedItem> = _receivedItems.asSharedFlow()
+
+    /**
+     * Index of the last item that was reported, `-1` if none, or `null` before the first
+     * connection. Items up to this index never count as new again.
+     */
+    val lastReportedIndex: StateFlow<Int?> = _lastReportedIndex.asStateFlow()
 
     /** Connects, or reconnects if already started. */
     fun start() {
@@ -73,6 +82,16 @@ class SlotConnection(
         job = null
         socket = null
         _state.value = SlotState.Idle
+    }
+
+    /**
+     * Treats every item received so far as reported, so only items received from now on are new.
+     * Returns `false` if not connected.
+     */
+    fun countFromNow(): Boolean {
+        val current = session?.takeIf { _state.value is SlotState.Connected } ?: return false
+        scope.launch { current.markAllReported() }
+        return true
     }
 
     /** Sends [text] as chat message or command. Returns `false` if not connected. */
@@ -123,11 +142,13 @@ class SlotConnection(
                 continue
             }
             socket = opened
+            val current = Session(url, opened)
+            session = current
             try {
-                val session = Session(url, opened)
-                val reason = session.run()
-                return Outcome(reason, session.connected, url)
+                val reason = current.run()
+                return Outcome(reason, current.connected, url)
             } finally {
+                session = null
                 socket = null
                 opened.close()
             }
@@ -233,7 +254,8 @@ class SlotConnection(
             val ownSlots = packet.players
                 .filter { it.team == packet.team && it.name in config.ownSlotNames }
                 .map { it.slot }
-                .toSet() + packet.slot
+                .toSet() +
+                listOfNotNull(packet.slot.takeIf { config.slotName in config.ownSlotNames })
             renderer = MessageRenderer(ownSlots)
             val key = SlotKey(serverKey(config.address), seedName, packet.team, packet.slot)
             slotKey = key
@@ -242,6 +264,7 @@ class SlotConnection(
             if (stored == null) {
                 itemIndexStore.setLastReportedIndex(key, lastReportedIndex)
             }
+            _lastReportedIndex.value = lastReportedIndex
             nextIndex = 0
             connected = true
             _state.value = SlotState.Connected(
@@ -253,6 +276,9 @@ class SlotConnection(
                     slot = packet.slot,
                     playerName = names.playerName(packet.slot),
                     game = packet.slotInfo[packet.slot]?.game,
+                    players = packet.players
+                        .filter { it.team == packet.team }
+                        .map { RoomPlayer(it.slot, it.name, packet.slotInfo[it.slot]?.game) },
                 ),
             )
         }
@@ -288,10 +314,20 @@ class SlotConnection(
             }
             nextIndex = packet.index + packet.items.size
             val key = slotKey
-            if (key != null && nextIndex - 1 > lastReportedIndex) {
-                lastReportedIndex = nextIndex - 1
-                itemIndexStore.setLastReportedIndex(key, lastReportedIndex)
+            if (nextIndex - 1 > lastReportedIndex) {
+                markReported(nextIndex - 1)
             }
+        }
+
+        suspend fun markAllReported() {
+            markReported(maxOf(nextIndex - 1, lastReportedIndex))
+        }
+
+        private suspend fun markReported(index: Int) {
+            val key = slotKey ?: return
+            lastReportedIndex = index
+            itemIndexStore.setLastReportedIndex(key, index)
+            _lastReportedIndex.value = index
         }
     }
 
