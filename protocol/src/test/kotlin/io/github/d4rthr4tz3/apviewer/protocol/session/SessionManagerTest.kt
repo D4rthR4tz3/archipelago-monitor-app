@@ -13,6 +13,7 @@ import io.github.d4rthr4tz3.apviewer.protocol.testing.FakeSocketFactory
 import io.github.d4rthr4tz3.apviewer.protocol.testing.TestRoom
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertNotSame
 import kotlin.test.assertSame
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -35,15 +36,33 @@ class SessionManagerTest {
         connectOnStart = false,
     )
 
-    private fun TestScope.manager() = SessionManager(
+    private fun TestScope.manager(socketFactory: FakeSocketFactory = factory) = SessionManager(
         scope = backgroundScope,
-        socketFactory = factory,
+        socketFactory = socketFactory,
         itemIndexStore = InMemoryItemIndexStore(),
         dataPackageCache = InMemoryDataPackageCache(),
         feedSink = { id, entries -> entries.forEach { stored += id to it } },
         uuid = "uuid",
         clock = { 1_000L },
     )
+
+    @Test
+    fun `retryNow restarts a multiworld whose server was unreachable`() = runTest {
+        var online = false
+        val offlineFactory = FakeSocketFactory(reachable = { online })
+        val manager = manager(offlineFactory)
+        manager.update(Profiles(multiworlds = listOf(zelda)))
+        runCurrent()
+        val failed = manager.sessions.value.getValue("zelda")
+        assertIs<SlotState.Failed>(failed.slots.single().state.value)
+
+        online = true
+        manager.retryNow()
+        runCurrent()
+
+        assertNotSame(failed, manager.sessions.value.getValue("zelda"))
+        assertEquals(1, offlineFactory.sockets.size)
+    }
 
     @Test
     fun `connects only multiworlds that connect on start`() = runTest {

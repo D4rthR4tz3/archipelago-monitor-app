@@ -23,4 +23,10 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onStart() {
+        super.onStart()
+        // Connections may have broken while the app was in the background; retry them right away.
+        (application as ApViewerApplication).container.sessions.retryNow()
+    }
 }

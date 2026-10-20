@@ -139,6 +139,11 @@ class MultiworldSession(
         stopCollectors()
     }
 
+    /** Ends the wait of every slot that waits to reconnect. */
+    fun retryNow() {
+        slots.forEach { it.retryNow() }
+    }
+
     /** Sends [text] as chat message or command from [slotName]. Returns `false` if not sent. */
     fun say(slotName: String, text: String): Boolean =
         slots.firstOrNull { it.config.slotName == slotName }?.say(text) ?: false

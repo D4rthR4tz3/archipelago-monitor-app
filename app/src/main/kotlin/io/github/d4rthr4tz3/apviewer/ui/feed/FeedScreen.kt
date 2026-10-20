@@ -697,8 +697,18 @@ private fun ConnectBar(status: MultiworldStatus, onConnect: () -> Unit) {
                 else -> ApColors.TextSecondary
             },
         )
-        if (status == MultiworldStatus.Disconnected || status is MultiworldStatus.Failed) {
-            PrimaryButton(text = stringResource(R.string.action_connect), onClick = onConnect)
+        when (status) {
+            MultiworldStatus.Disconnected, is MultiworldStatus.Failed -> PrimaryButton(
+                text = stringResource(R.string.action_connect),
+                onClick = onConnect,
+            )
+
+            is MultiworldStatus.Reconnecting -> SecondaryButton(
+                text = stringResource(R.string.action_connect_now),
+                onClick = onConnect,
+            )
+
+            else -> Unit
         }
     }
 }

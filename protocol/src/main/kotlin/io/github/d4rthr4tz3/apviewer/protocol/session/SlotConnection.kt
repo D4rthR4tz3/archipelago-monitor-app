@@ -20,7 +20,7 @@ import java.util.UUID
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.JsonElement
 
 /**
@@ -53,6 +54,7 @@ class SlotConnection(
     private val _lastReportedIndex = MutableStateFlow<Int?>(null)
     private val _hints = MutableStateFlow<List<SlotHint>>(emptyList())
     private var job: Job? = null
+    private val retry = Channel<Unit>(Channel.CONFLATED)
 
     @Volatile private var session: Session? = null
 
@@ -113,6 +115,16 @@ class SlotConnection(
         return true
     }
 
+    /**
+     * Ends the wait before the next reconnect attempt, for example when the network is back.
+     * Returns `false` if the slot is not waiting to reconnect.
+     */
+    fun retryNow(): Boolean {
+        if (_state.value !is SlotState.Reconnecting) return false
+        retry.trySend(Unit)
+        return true
+    }
+
     /** Sends [text] as chat message or command. Returns `false` if not connected. */
     fun say(text: String): Boolean {
         if (_state.value !is SlotState.Connected) return false
@@ -133,13 +145,15 @@ class SlotConnection(
             }
             attempt = if (outcome.connected) 1 else attempt + 1
             val delayMillis = reconnectPolicy.delayMillis(attempt)
+            // A request from before this wait must not cut it short.
+            retry.tryReceive()
             _state.value = SlotState.Reconnecting(
                 attempt = attempt,
                 delayMillis = delayMillis,
                 reason = outcome.reason,
                 lastUrl = preferredUrl ?: candidateUrls(config.address).first(),
             )
-            delay(delayMillis)
+            withTimeoutOrNull(delayMillis) { retry.receive() }
         }
     }
 
