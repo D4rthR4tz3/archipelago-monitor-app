@@ -50,10 +50,11 @@ fun itemClassStyle(itemClass: ItemClass): ItemClassStyle = when (itemClass) {
     ItemClass.FILLER -> ItemClassStyle(ContentColors.Filler, FontWeight.Normal)
 }
 
-private fun FeedMessage.background(): Color = when (highlight) {
-    FeedHighlight.FOR_ME -> ContentColors.HighlightForMe
-    FeedHighlight.FROM_ME -> ContentColors.HighlightFromMe
-    FeedHighlight.NONE -> Color.Transparent
+/** Hints stand out from items; of the items, only those for the user's slots are highlighted. */
+private fun FeedMessage.background(): Color = when {
+    hintParts() != null -> ContentColors.HighlightHint
+    highlight == FeedHighlight.FOR_ME -> ContentColors.HighlightForMe
+    else -> Color.Transparent
 }
 
 private fun FeedMessage.isChat(): Boolean = type == "Chat" || type == "ServerChat"
