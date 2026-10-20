@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -240,19 +241,23 @@ private fun HintDetail(label: String, value: String, color: Color) {
         Text(
             text = label,
             modifier = Modifier.width(76.dp),
-            style = MaterialTheme.typography.bodySmall,
+            style = DetailStyle,
             color = ApColors.TextTertiary,
         )
         Text(
             text = value,
             modifier = Modifier.weight(1f),
-            style = MaterialTheme.typography.bodySmall,
+            style = DetailStyle,
             color = color,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
     }
 }
+
+/** Same size as the detail lines in the Feed and Items tabs. */
+private val DetailStyle: TextStyle
+    @Composable get() = MaterialTheme.typography.labelSmall.copy(lineHeight = 16.sp)
 
 /** Landscape table of all hints, sortable by every column. */
 @Composable
