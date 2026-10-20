@@ -28,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -109,10 +110,14 @@ fun HintsList(
                 )
             }
         } else {
-            LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                items(state.visible, key = { it.key }) { hint ->
-                    HintRow(hint = hint)
-                    HorizontalDivider(color = ApColors.Divider)
+            // Each tab is a list of its own that starts at the top; with a shared list state, a
+            // hint shown in both tabs would keep its position and scroll the other list.
+            key(state.direction) {
+                LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    items(state.visible, key = { it.key }) { hint ->
+                        HintRow(hint = hint)
+                        HorizontalDivider(color = ApColors.Divider)
+                    }
                 }
             }
         }
