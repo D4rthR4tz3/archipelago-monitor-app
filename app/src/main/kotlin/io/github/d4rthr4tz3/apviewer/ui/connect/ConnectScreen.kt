@@ -41,16 +41,17 @@ import io.github.d4rthr4tz3.apviewer.protocol.monitor.MonitorState
 import io.github.d4rthr4tz3.apviewer.ui.theme.ApColors
 import io.github.d4rthr4tz3.apviewer.ui.theme.ApViewerTheme
 
-/** Form for the server address and slot credentials. */
+/** Form for the server address and slot credentials, prefilled with [initial] once known. */
 @Composable
 fun ConnectScreen(
     state: MonitorState,
+    initial: ConnectionConfig?,
     onConnect: (ConnectionConfig) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var address by rememberSaveable { mutableStateOf("") }
-    var slotName by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
+    var address by rememberSaveable(initial) { mutableStateOf(initial?.address.orEmpty()) }
+    var slotName by rememberSaveable(initial) { mutableStateOf(initial?.slotName.orEmpty()) }
+    var password by rememberSaveable(initial) { mutableStateOf(initial?.password.orEmpty()) }
     val isConnecting = state is MonitorState.Connecting
     val canConnect = !isConnecting && address.isNotBlank() && slotName.isNotBlank()
 
@@ -211,6 +212,7 @@ private fun ConnectScreenPreview() {
     ApViewerTheme {
         ConnectScreen(
             state = MonitorState.Failed(FailureReason.Refused(listOf("InvalidSlot"))),
+            initial = ConnectionConfig(address = "archipelago.gg:38281", slotName = "Link"),
             onConnect = {},
         )
     }
