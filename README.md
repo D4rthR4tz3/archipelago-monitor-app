@@ -1,9 +1,11 @@
 # archipelago-viewer-app
 
-Android app that watches a running [Archipelago](https://archipelago.gg) multiworld room. It
-connects to a slot as a tracker (it never sends checks) and shows the room's messages live: items
-sent and received, hints, chat and join/leave events, with player, item and location names
-resolved and colored like in the Archipelago text client.
+AP Monitor is an Android app that keeps an eye on your [Archipelago](https://archipelago.gg)
+multiworlds. Add as many multiworlds as you like, each with your own slots; the app connects every
+slot as a tracker (it never sends checks, so it runs next to your game client) and notifies you when
+one of your slots receives an item, someone hints an item for you or a chat message names you. Each
+multiworld has a live text client with items, hints, chat and join/leave events, names resolved and
+colored like in the Archipelago text client, plus a hint list and the items each slot received.
 
 ## Features
 

@@ -1,6 +1,8 @@
 # archipelago-viewer-app
 
-Android app that monitors a running [Archipelago](https://archipelago.gg) multiworld session.
+Android app ("AP Monitor") that monitors several [Archipelago](https://archipelago.gg) multiworlds
+with several slots each, in the foreground and in the background, and notifies about items, hints
+and chat mentions.
 
 ## Conventions (mandatory)
 
