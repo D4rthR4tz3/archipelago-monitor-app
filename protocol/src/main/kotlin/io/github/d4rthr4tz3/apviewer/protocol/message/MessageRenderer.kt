@@ -3,6 +3,7 @@ package io.github.d4rthr4tz3.apviewer.protocol.message
 import io.github.d4rthr4tz3.apviewer.protocol.model.JsonMessagePart
 import io.github.d4rthr4tz3.apviewer.protocol.model.NetworkItem
 import io.github.d4rthr4tz3.apviewer.protocol.packet.ServerPacket
+import kotlinx.serialization.Serializable
 
 /** Kinds of [MessageSegment], used by the UI to pick a color. */
 enum class SegmentKind {
@@ -16,6 +17,7 @@ enum class SegmentKind {
 }
 
 /** A piece of a rendered message. [itemFlags] is set for [SegmentKind.ITEM] only. */
+@Serializable
 data class MessageSegment(
     val text: String,
     val kind: SegmentKind = SegmentKind.TEXT,
@@ -37,6 +39,7 @@ enum class FeedHighlight {
  * A rendered `PrintJSON` message. [type] is the server's message type, such as `ItemSend`. For item
  * messages, [receivingSlot] is the slot that gets [item], and [NetworkItem.player] is the sender.
  */
+@Serializable
 data class FeedMessage(
     val type: String?,
     val segments: List<MessageSegment>,
