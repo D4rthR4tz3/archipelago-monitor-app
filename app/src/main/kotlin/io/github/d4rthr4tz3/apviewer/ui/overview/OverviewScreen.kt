@@ -187,6 +187,8 @@ private fun ConnectionsCard(state: OverviewState, onCheckedChange: (Boolean) -> 
             .background(ApColors.Surface, MaterialTheme.shapes.medium)
             .toggleable(
                 value = state.connectionsEnabled,
+                // Without a network the switch changes nothing anyone could notice.
+                enabled = state.online,
                 role = Role.Switch,
                 onValueChange = onChange,
             )
@@ -197,10 +199,10 @@ private fun ConnectionsCard(state: OverviewState, onCheckedChange: (Boolean) -> 
             Text(
                 text = stringResource(R.string.overview_connections),
                 style = MaterialTheme.typography.labelLarge,
-                color = ApColors.TextPrimary,
+                color = if (state.online) ApColors.TextPrimary else ApColors.TextTertiary,
             )
             Text(
-                text = if (state.online || !state.connectionsEnabled) {
+                text = if (state.online) {
                     stringResource(
                         R.string.overview_active_slots,
                         state.connectedSlots,
@@ -210,16 +212,14 @@ private fun ConnectionsCard(state: OverviewState, onCheckedChange: (Boolean) -> 
                     stringResource(R.string.overview_offline)
                 },
                 style = MaterialTheme.typography.bodySmall,
-                color = if (state.online ||
-                    !state.connectionsEnabled
-                ) {
-                    ApColors.TextSecondary
-                } else {
-                    ApColors.Warning
-                },
+                color = if (state.online) ApColors.TextSecondary else ApColors.Warning,
             )
         }
-        ApSwitch(checked = state.connectionsEnabled, onCheckedChange = onChange)
+        ApSwitch(
+            checked = state.connectionsEnabled,
+            onCheckedChange = onChange,
+            enabled = state.online,
+        )
     }
 }
 
