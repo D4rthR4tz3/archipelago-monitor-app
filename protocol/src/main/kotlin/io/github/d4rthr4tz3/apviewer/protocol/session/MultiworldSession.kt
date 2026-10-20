@@ -1,6 +1,7 @@
 package io.github.d4rthr4tz3.apviewer.protocol.session
 
 import io.github.d4rthr4tz3.apviewer.protocol.client.PacketSocketFactory
+import io.github.d4rthr4tz3.apviewer.protocol.message.FeedMessage
 import io.github.d4rthr4tz3.apviewer.protocol.model.HintStatus
 import io.github.d4rthr4tz3.apviewer.protocol.monitor.FeedEntry
 import io.github.d4rthr4tz3.apviewer.protocol.store.DataPackageCache
@@ -40,8 +41,10 @@ data class MultiworldConfig(
 data class SlotReceivedItem(val slotName: String, val item: ReceivedItem)
 
 /**
- * Connections of all of the user's slots in one multiworld. Only the first slot receives the
- * room's text, the others connect with the `NoText` tag; the text slot's messages form [feed].
+ * Connections of all of the user's slots in one multiworld. Every slot receives the room's text.
+ * The first connected slot provides the messages sent to the whole room; the others only add the
+ * messages the server sends to them alone, such as their hints and command answers. Together they
+ * form [feed].
  */
 class MultiworldSession(
     private val scope: CoroutineScope,
@@ -72,7 +75,6 @@ class MultiworldSession(
                 address = config.address,
                 slotName = slot.name,
                 password = slot.password.ifEmpty { config.roomPassword },
-                receivesText = index == 0,
                 ownSlotNames = config.slots.filter { it.highlight }.map { it.name }.toSet(),
             ),
             itemIndexStore = itemIndexStore,
@@ -115,15 +117,11 @@ class MultiworldSession(
     fun start() {
         stopCollectors()
         _feed.value = emptyList()
-        val textSlot = slots.first()
-        collectors += scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            textSlot.messages.collect { message ->
-                val entry = FeedEntry(
-                    id = nextEntryId++,
-                    message = message,
-                    receivedAtMillis = clock(),
-                )
-                _feed.update { feed -> (feed + entry).takeLast(maxFeedSize) }
+        slots.forEachIndexed { index, slot ->
+            collectors += scope.launch(start = CoroutineStart.UNDISPATCHED) {
+                slot.messages.collect { message ->
+                    if (takesMessage(index, message)) append(message)
+                }
             }
         }
         slots.forEach { slot ->
@@ -157,6 +155,32 @@ class MultiworldSession(
         return receiver.updateHint(hint.findingSlot, hint.locationId, status)
     }
 
+    @Synchronized
+    private fun append(message: FeedMessage) {
+        val entry = FeedEntry(id = nextEntryId++, message = message, receivedAtMillis = clock())
+        _feed.update { feed -> (feed + entry).takeLast(maxFeedSize) }
+    }
+
+    /**
+     * Returns whether the message the slot at [index] received belongs in the feed. The server
+     * sends room-wide messages to every slot, so only the first connected slot keeps them. Command
+     * answers go to the sending slot alone, and a hint goes to its receiving and finding slots, of
+     * which the first connected one keeps it.
+     */
+    private fun takesMessage(index: Int, message: FeedMessage): Boolean {
+        val connected = slots.map { (it.state.value as? SlotState.Connected)?.info?.slot }
+        return when (message.type) {
+            in DIRECT_MESSAGE_TYPES -> true
+
+            "Hint" -> {
+                val involved = setOfNotNull(message.receivingSlot, message.item?.player)
+                connected.indexOfFirst { it in involved }.let { it == index || it < 0 }
+            }
+
+            else -> connected.indexOfFirst { it != null }.let { it == index || it < 0 }
+        }
+    }
+
     private fun stopCollectors() {
         collectors.forEach(Job::cancel)
         collectors.clear()
@@ -164,5 +188,8 @@ class MultiworldSession(
 
     private companion object {
         const val DEFAULT_MAX_FEED_SIZE = 500
+
+        /** `PrintJSON` types the server sends only to the connection that caused them. */
+        val DIRECT_MESSAGE_TYPES = setOf("CommandResult", "AdminCommandResult")
     }
 }
