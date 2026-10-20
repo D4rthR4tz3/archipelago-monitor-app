@@ -313,6 +313,7 @@ private fun SayBar(
             onValueChange = { text = it },
             modifier = Modifier.weight(1f),
             placeholder = stringResource(R.string.say_placeholder),
+            height = 44.dp,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
             keyboardActions = KeyboardActions(onSend = { send() }),
         )
