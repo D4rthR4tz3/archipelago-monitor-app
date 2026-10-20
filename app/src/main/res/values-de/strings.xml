@@ -1,11 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="connect_title">Mit einem Raum verbinden</string>
-    <string name="connect_address">Serveradresse</string>
-    <string name="connect_slot_name">Slot-Name</string>
-    <string name="connect_password">Passwort (optional)</string>
-    <string name="connect_button">Verbinden</string>
-    <string name="connect_connecting">Verbinde mit %1$s…</string>
+    <string name="action_add">Hinzufügen</string>
+    <string name="action_back">Zurück</string>
+    <string name="action_cancel">Abbrechen</string>
+    <string name="action_close">Schließen</string>
+    <string name="action_connect">Verbinden</string>
+    <string name="action_disconnect">Trennen</string>
+    <string name="action_remove">Entfernen</string>
+    <string name="action_save">Speichern</string>
+
+    <string name="status_disconnected">Getrennt</string>
+    <string name="status_connecting">Verbinde</string>
+    <string name="status_connected">Verbunden</string>
+    <string name="status_reconnecting">Verbinde neu</string>
+    <string name="status_failed">Fehler</string>
+    <string name="status_reconnecting_detail">Verbindung um %1$s verloren, %2$d. Versuch</string>
+    <string name="status_failed_detail">%1$s: %2$s</string>
+    <string name="status_with_slots">%1$s, %2$s</string>
+    <plurals name="slot_count">
+        <item quantity="one">%d Slot</item>
+        <item quantity="other">%d Slots</item>
+    </plurals>
 
     <string name="error_unreachable">Server nicht erreichbar.</string>
     <string name="error_unreachable_detail">Server nicht erreichbar: %1$s</string>
@@ -16,7 +31,114 @@
     <string name="error_invalid_password">falsches Passwort</string>
     <string name="error_incompatible_version">inkompatible Version</string>
 
-    <string name="feed_seed">Seed %1$s · Server %2$s</string>
+    <string name="overview_settings">App-Einstellungen</string>
+    <string name="overview_connections">Verbindungen aktiv</string>
+    <string name="overview_active_slots">%1$d von %2$d Slots aktiv</string>
+    <string name="overview_multiworlds">Multiworlds</string>
+    <string name="overview_empty">Noch keine Multiworld. Füge eine hinzu, um einen Raum zu beobachten.</string>
+    <string name="overview_add">Multiworld</string>
+    <string name="overview_latest_item">%1$s %2$s an %3$s</string>
+    <plurals name="overview_unread">
+        <item quantity="one">%d neu</item>
+        <item quantity="other">%d neu</item>
+    </plurals>
+
+    <string name="tab_feed">Feed</string>
+    <string name="tab_hints">Hints</string>
+    <string name="feed_multiworld_settings">Multiworld-Einstellungen</string>
     <string name="feed_empty">Noch keine Nachrichten.</string>
-    <string name="feed_disconnect">Trennen</string>
+    <string name="feed_to">" an "</string>
+    <string name="feed_themselves">sich selbst</string>
+    <string name="filter_all">Alle</string>
+    <string name="filter_for_me">Für mich</string>
+    <string name="filter_from_me">Von mir</string>
+    <string name="filter_chat">Chat</string>
+    <string name="filter_item_types">Nach Item-Typ filtern</string>
+    <string name="hints_coming">Hints folgen im nächsten Schritt.</string>
+    <string name="say_placeholder">Nachricht oder !hint</string>
+    <string name="say_send">Senden</string>
+    <string name="say_as">Senden als %1$s</string>
+    <string name="say_unavailable">Nicht verbunden.</string>
+
+    <string name="item_class_progression">Progression</string>
+    <string name="item_class_useful">Nützlich</string>
+    <string name="item_class_filler">Filler</string>
+    <string name="item_class_trap">Falle</string>
+
+    <string name="edit_title">Multiworld bearbeiten</string>
+    <string name="edit_title_new">Neue Multiworld</string>
+    <string name="edit_connection">Verbindung</string>
+    <string name="edit_name">Name</string>
+    <string name="edit_host">Server-Adresse</string>
+    <string name="edit_port">Port</string>
+    <string name="edit_room_password">Raum-Passwort (optional)</string>
+    <string name="password_none">Kein Passwort</string>
+    <string name="password_show">Passwort anzeigen</string>
+    <string name="password_hide">Passwort verbergen</string>
+    <string name="probe_idle">Server noch nicht geprüft</string>
+    <string name="probe_checking">Prüfe Server…</string>
+    <string name="probe_reachable">Server erreichbar</string>
+    <string name="probe_unreachable">Server nicht erreichbar</string>
+    <string name="probe_secure">Verschlüsselt (wss), Archipelago %1$s</string>
+    <string name="probe_insecure">Unverschlüsselt (ws), Archipelago %1$s</string>
+    <string name="probe_test">Testen</string>
+    <string name="probe_retest">Erneut testen</string>
+    <string name="edit_own_slots">Meine Slots</string>
+    <string name="edit_add_slot">Slot manuell hinzufügen</string>
+    <string name="edit_add_named_slot">%1$s hinzufügen</string>
+    <string name="edit_other_slots">Weitere Slots dieser Multiworld</string>
+    <string name="edit_other_slots_hint">Vom Server gemeldet. Ein Passwort ist nur nötig, wenn der Slot eines hat.</string>
+    <string name="edit_search_slots">Slot oder Spiel suchen</string>
+    <plurals name="edit_show_all">
+        <item quantity="one">%d anzeigen</item>
+        <item quantity="other">Alle %d anzeigen</item>
+    </plurals>
+    <string name="edit_behavior">Verhalten</string>
+    <string name="edit_connect_on_start">Beim App-Start verbinden</string>
+    <string name="edit_keep_in_background">Im Hintergrund verbunden halten</string>
+    <string name="edit_keep_in_background_hint">Nötig für Benachrichtigungen bei geschlossener App</string>
+    <string name="edit_retention">Feed-Verlauf aufbewahren</string>
+    <string name="retention_unlimited">Unbegrenzt</string>
+    <plurals name="retention_days">
+        <item quantity="one">%d Tag</item>
+        <item quantity="other">%d Tage</item>
+    </plurals>
+    <string name="edit_remove">Multiworld entfernen</string>
+    <string name="edit_remove_title">%1$s entfernen?</string>
+    <string name="edit_remove_text">Ihre Einstellungen und der gespeicherte Feed werden gelöscht.</string>
+
+    <string name="slot_number">Slot %1$d</string>
+    <string name="slot_connected">Verbunden als Tracker</string>
+    <string name="slot_connected_hint">Läuft parallel zu deinem Spielclient</string>
+    <string name="slot_access">Zugang</string>
+    <string name="slot_name">Slotname</string>
+    <string name="slot_password">Slot-Passwort (optional)</string>
+    <string name="slot_highlight">Im Feed hervorheben</string>
+    <string name="slot_highlight_hint">Findings für und von diesem Slot</string>
+    <string name="slot_notifications">Benachrichtigungen bei erhaltenen Items</string>
+    <string name="notify_item_type">Item-Typ</string>
+    <string name="notify_off">Aus</string>
+    <string name="notify_silent">Still</string>
+    <string name="notify_sound">Ton</string>
+    <string name="notify_own_world">Items aus eigener Welt</string>
+    <string name="notify_own_world_hint">Auch selbst gefundene Items melden</string>
+    <string name="notify_hints">Neue Hints</string>
+    <string name="notify_hints_hint">Wenn jemand ein Item für dich hintet</string>
+    <string name="notify_mentions">Erwähnungen im Chat</string>
+    <string name="notify_mentions_hint">Wenn der Slotname im Chat fällt</string>
+    <string name="slot_sync">Synchronisation</string>
+    <string name="slot_sync_last_prefix">"Zuletzt gemeldet: Item "</string>
+    <string name="slot_sync_last_suffix">". Ältere Items lösen keine Benachrichtigung aus, auch nicht nach einem Neuverbinden."</string>
+    <string name="slot_sync_none">Noch kein Item gemeldet.</string>
+    <string name="slot_sync_unknown">Bekannt, sobald der Slot verbunden ist.</string>
+    <string name="slot_count_from_now">Ab jetzt zählen</string>
+    <string name="slot_remove">Slot entfernen</string>
+    <string name="slot_remove_title">%1$s entfernen?</string>
+    <string name="slot_remove_text">Der Slot wird entfernt, sobald du die Multiworld speicherst.</string>
+
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_feed_layout">Feed-Darstellung</string>
+    <string name="settings_layout_classic">Klassisch</string>
+    <string name="settings_layout_structured">Strukturiert</string>
+    <string name="settings_feed_layout_hint">Klassisch zeigt eine Zeile pro Nachricht wie der Archipelago-Textclient, strukturiert zeigt das Item zuerst.</string>
 </resources>

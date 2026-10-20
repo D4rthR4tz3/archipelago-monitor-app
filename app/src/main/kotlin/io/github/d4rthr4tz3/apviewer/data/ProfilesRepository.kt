@@ -20,6 +20,10 @@ import kotlinx.serialization.SerializationException
 class ProfilesRepository(private val dataStore: DataStore<Profiles>) {
     val profiles: Flow<Profiles> = dataStore.data
 
+    suspend fun update(transform: (Profiles) -> Profiles) {
+        dataStore.updateData(transform)
+    }
+
     /** Adds [multiworld], or replaces the saved one with the same id. */
     suspend fun saveMultiworld(multiworld: SavedMultiworld) {
         dataStore.updateData { it.withMultiworld(multiworld) }

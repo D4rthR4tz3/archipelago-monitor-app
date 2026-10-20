@@ -279,6 +279,59 @@ class SlotConnectionTest {
     }
 
     @Test
+    fun `reports the players of the team with their games`() = runTest {
+        val connection = connection()
+        connection.start()
+        runCurrent()
+        factory.last.receive(TestRoom.roomInfo)
+        factory.last.receive(
+            TestRoom.connected(slot = 1).copy(
+                slotInfo = mapOf(2 to NetworkSlot(name = "Samus", game = "Super Metroid")),
+            ),
+        )
+        runCurrent()
+
+        val info = assertIs<SlotState.Connected>(connection.state.value).info
+        assertEquals(
+            listOf(
+                RoomPlayer(1, "Link", null),
+                RoomPlayer(2, "Samus", "Super Metroid"),
+                RoomPlayer(3, "Zelda", null),
+            ),
+            info.players,
+        )
+    }
+
+    @Test
+    fun `counts from now after countFromNow`() = runTest {
+        val connection = connection()
+        connection.start()
+        runCurrent()
+        factory.last.receive(TestRoom.roomInfo)
+        factory.last.receive(TestRoom.connected(slot = 1))
+        runCurrent()
+        assertEquals(-1, connection.lastReportedIndex.value)
+        factory.last.receive(
+            ServerPacket.ReceivedItems(
+                index = 0,
+                items = listOf(TestRoom.item(1, from = 2), TestRoom.item(2, from = 2)),
+            ),
+        )
+        runCurrent()
+
+        assertTrue(connection.countFromNow())
+        runCurrent()
+
+        assertEquals(1, connection.lastReportedIndex.value)
+        assertEquals(1, indexStore.lastReportedIndex(key))
+    }
+
+    @Test
+    fun `countFromNow does nothing while not connected`() = runTest {
+        assertFalse(connection().countFromNow())
+    }
+
+    @Test
     fun `builds candidate urls from user input`() {
         assertEquals(
             listOf("wss://archipelago.gg:38281", "ws://archipelago.gg:38281"),
