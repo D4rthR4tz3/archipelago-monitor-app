@@ -47,6 +47,9 @@
     <string name="overview_settings">App settings</string>
     <string name="overview_connections">Connections active</string>
     <string name="overview_active_slots">%1$d of %2$d slots active</string>
+    <string name="overview_disable_title">Turn off all connections?</string>
+    <string name="overview_disable_text">All multiworlds disconnect. Chat and server messages from that time are missing from the feed; received items come in when you reconnect.</string>
+    <string name="overview_disable_confirm">Turn off</string>
     <string name="overview_multiworlds">Multiworlds</string>
     <string name="overview_empty">No multiworld yet</string>
     <string name="overview_empty_text">Add a multiworld with the server address and your slot names. The app connects as a tracker and does not disturb your game client.</string>

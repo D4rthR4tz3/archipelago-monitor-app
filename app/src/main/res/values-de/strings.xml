@@ -45,6 +45,9 @@
     <string name="overview_settings">App-Einstellungen</string>
     <string name="overview_connections">Verbindungen aktiv</string>
     <string name="overview_active_slots">%1$d von %2$d Slots aktiv</string>
+    <string name="overview_disable_title">Alle Verbindungen trennen?</string>
+    <string name="overview_disable_text">Alle Multiworlds werden getrennt. Chat und Meldungen aus dieser Zeit fehlen danach im Feed, empfangene Items kommen beim erneuten Verbinden nach.</string>
+    <string name="overview_disable_confirm">Trennen</string>
     <string name="overview_multiworlds">Multiworlds</string>
     <string name="overview_empty">Noch keine Multiworld</string>
     <string name="overview_empty_text">Füge eine Multiworld mit Serveradresse und deinen Slotnamen hinzu. Die App verbindet sich als Tracker und stört deinen Spielclient nicht.</string>
