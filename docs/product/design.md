@@ -75,7 +75,7 @@ This page records the design rules and tokens that apply to every screen.
 | HintsWide     | Landscape table with sortable columns item, receiver, location, finder, entrance, status |
 | MwEdit        | Connection (name, address, port, room password, reachability test), my slots, other slots reported by the server, behavior (connect on start, keep in background, feed retention 1/7/30 days/unlimited), remove |
 | SlotSettings  | Slot status, access (slot name; the password is per room), feed highlight, notifications per item type (off / silent / sound), extras (own world items, new hints, chat mentions), synchronization (last reported item index, "count from now"), remove |
-| Notifications | Ongoing service notification, grouped item notifications with item name colored, hint notification with "mark as priority" action |
+| Notifications | Ongoing service notification, grouped item notifications with item name colored, hint notification (no "mark as priority" action, the hint status is read-only) |
 | Legende       | Color legend |
 
 ## Launcher icon
