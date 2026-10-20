@@ -8,6 +8,8 @@ import io.github.d4rthr4tz3.apviewer.protocol.model.NetworkSlot
 import io.github.d4rthr4tz3.apviewer.protocol.model.NetworkVersion
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 
 /** Packets sent from the server to the client. */
@@ -72,6 +74,14 @@ sealed interface ServerPacket {
         val slot: Int? = null,
         val message: String? = null,
     ) : ServerPacket
+
+    /** Answer to [ClientPacket.Get] with the values of the requested keys. */
+    @Serializable
+    data class Retrieved(val keys: Map<String, JsonElement> = emptyMap()) : ServerPacket
+
+    /** A changed data storage value the client subscribed to with [ClientPacket.SetNotify]. */
+    @Serializable
+    data class SetReply(val key: String, val value: JsonElement = JsonNull) : ServerPacket
 
     /** A packet whose `cmd` this client does not handle. */
     data class Unknown(val cmd: String, val raw: JsonObject) : ServerPacket

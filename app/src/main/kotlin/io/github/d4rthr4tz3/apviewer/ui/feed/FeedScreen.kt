@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -46,6 +47,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -70,6 +72,9 @@ import io.github.d4rthr4tz3.apviewer.ui.components.ScreenHeader
 import io.github.d4rthr4tz3.apviewer.ui.components.SegmentedControl
 import io.github.d4rthr4tz3.apviewer.ui.components.SwitchRow
 import io.github.d4rthr4tz3.apviewer.ui.containerViewModel
+import io.github.d4rthr4tz3.apviewer.ui.hints.HintsList
+import io.github.d4rthr4tz3.apviewer.ui.hints.HintsTable
+import io.github.d4rthr4tz3.apviewer.ui.hints.HintsViewModel
 import io.github.d4rthr4tz3.apviewer.ui.statusDetail
 import io.github.d4rthr4tz3.apviewer.ui.statusWithSlots
 import io.github.d4rthr4tz3.apviewer.ui.theme.ApColors
@@ -81,9 +86,12 @@ enum class MultiworldTab { FEED, HINTS }
 @Composable
 fun FeedRoute(multiworldId: String, onBack: () -> Unit, onEdit: () -> Unit) {
     val viewModel = containerViewModel { FeedViewModel(it, multiworldId) }
+    val hintsViewModel = containerViewModel { HintsViewModel(it, multiworldId) }
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val hints by hintsViewModel.state.collectAsStateWithLifecycle()
     FeedScreen(
         state = state,
+        priorityHints = hints.priorityCount,
         onBack = onBack,
         onEdit = onEdit,
         onFilterChange = viewModel::setFilter,
@@ -91,13 +99,35 @@ fun FeedRoute(multiworldId: String, onBack: () -> Unit, onEdit: () -> Unit) {
         onSendAsChange = viewModel::setSendAs,
         onSay = viewModel::say,
         onConnect = viewModel::connect,
+        hintsList = { modifier ->
+            HintsList(
+                state = hints,
+                onDirectionChange = hintsViewModel::setDirection,
+                onSlotChange = hintsViewModel::setSlot,
+                onHideFoundChange = hintsViewModel::setHideFound,
+                onStatusChange = { hint, status -> hintsViewModel.updateStatus(hint, status) },
+                modifier = modifier,
+            )
+        },
+        hintsTable = {
+            HintsTable(
+                name = state.name,
+                state = hints,
+                onSortChange = hintsViewModel::setSortColumn,
+                onBack = onBack,
+            )
+        },
     )
 }
 
-/** Text client of a multiworld: the room's messages, filters and the chat input. */
+/**
+ * Text client of a multiworld: the room's messages, filters and the chat input, and the Hints tab
+ * with [hintsList]. In landscape the Hints tab fills the screen with [hintsTable].
+ */
 @Composable
 fun FeedScreen(
     state: FeedState,
+    priorityHints: Int,
     onBack: () -> Unit,
     onEdit: () -> Unit,
     onFilterChange: (FeedFilter) -> Unit,
@@ -105,12 +135,58 @@ fun FeedScreen(
     onSendAsChange: (String) -> Unit,
     onSay: (String) -> Boolean,
     onConnect: () -> Unit,
+    hintsList: @Composable (Modifier) -> Unit,
+    hintsTable: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var tab by rememberSaveable { mutableStateOf(MultiworldTab.FEED) }
     var showItemFilter by rememberSaveable { mutableStateOf(false) }
 
-    Column(modifier = modifier.fillMaxSize().imePadding()) {
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        if (tab == MultiworldTab.HINTS && maxWidth > maxHeight) {
+            hintsTable()
+        } else {
+            FeedColumn(
+                state = state,
+                tab = tab,
+                priorityHints = priorityHints,
+                onTabChange = { tab = it },
+                onBack = onBack,
+                onEdit = onEdit,
+                onFilterChange = onFilterChange,
+                onOpenItemFilter = { showItemFilter = true },
+                onSendAsChange = onSendAsChange,
+                onSay = onSay,
+                onConnect = onConnect,
+                hintsList = hintsList,
+            )
+        }
+    }
+    if (showItemFilter) {
+        ItemFilterSheet(
+            selected = state.itemClasses,
+            onChange = onItemClassesChange,
+            onDismiss = { showItemFilter = false },
+        )
+    }
+}
+
+@Composable
+private fun FeedColumn(
+    state: FeedState,
+    tab: MultiworldTab,
+    priorityHints: Int,
+    onTabChange: (MultiworldTab) -> Unit,
+    onBack: () -> Unit,
+    onEdit: () -> Unit,
+    onFilterChange: (FeedFilter) -> Unit,
+    onOpenItemFilter: () -> Unit,
+    onSendAsChange: (String) -> Unit,
+    onSay: (String) -> Boolean,
+    onConnect: () -> Unit,
+    hintsList: @Composable (Modifier) -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxSize().imePadding()) {
         ScreenHeader(
             title = state.name,
             subtitle = statusWithSlots(state.status, state.slotNames.size),
@@ -129,26 +205,19 @@ fun FeedScreen(
                 )
             },
         )
-        Tabs(selected = tab, onSelect = { tab = it })
+        Tabs(selected = tab, priorityHints = priorityHints, onSelect = onTabChange)
         when (tab) {
             MultiworldTab.FEED -> {
                 FilterBar(
                     filter = state.filter,
                     itemFilterActive = state.itemClasses.size < ItemClass.entries.size,
                     onFilterChange = onFilterChange,
-                    onOpenItemFilter = { showItemFilter = true },
+                    onOpenItemFilter = onOpenItemFilter,
                 )
                 FeedList(state = state, modifier = Modifier.weight(1f))
             }
 
-            MultiworldTab.HINTS -> Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                Text(
-                    text = stringResource(R.string.hints_coming),
-                    modifier = Modifier.padding(20.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = ApColors.TextTertiary,
-                )
-            }
+            MultiworldTab.HINTS -> hintsList(Modifier.weight(1f))
         }
         HorizontalDivider(color = ApColors.Divider)
         if (state.status is MultiworldStatus.Connected) {
@@ -162,17 +231,10 @@ fun FeedScreen(
             ConnectBar(status = state.status, onConnect = onConnect)
         }
     }
-    if (showItemFilter) {
-        ItemFilterSheet(
-            selected = state.itemClasses,
-            onChange = onItemClassesChange,
-            onDismiss = { showItemFilter = false },
-        )
-    }
 }
 
 @Composable
-private fun Tabs(selected: MultiworldTab, onSelect: (MultiworldTab) -> Unit) {
+private fun Tabs(selected: MultiworldTab, priorityHints: Int, onSelect: (MultiworldTab) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -190,7 +252,7 @@ private fun Tabs(selected: MultiworldTab, onSelect: (MultiworldTab) -> Unit) {
             MultiworldTab.HINTS to stringResource(R.string.tab_hints),
         ).forEach { (tab, label) ->
             val isSelected = tab == selected
-            Box(
+            Row(
                 modifier = Modifier
                     .weight(1f)
                     .height(48.dp)
@@ -204,13 +266,23 @@ private fun Tabs(selected: MultiworldTab, onSelect: (MultiworldTab) -> Unit) {
                             )
                         }
                     },
-                contentAlignment = Alignment.Center,
+                horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = label,
                     style = MaterialTheme.typography.titleSmall,
+                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
                     color = if (isSelected) ApColors.TextPrimary else ApColors.TextSecondary,
                 )
+                if (tab == MultiworldTab.HINTS && priorityHints > 0) {
+                    Text(
+                        text = stringResource(R.string.hints_tab_count, priorityHints),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Medium,
+                        color = ApColors.TextSecondary,
+                    )
+                }
             }
         }
     }
@@ -523,6 +595,9 @@ private fun FeedScreenPreview() {
             onSendAsChange = {},
             onSay = { true },
             onConnect = {},
+            priorityHints = 2,
+            hintsList = {},
+            hintsTable = {},
         )
     }
 }
