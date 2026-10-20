@@ -1,4 +1,4 @@
-# archipelago-viewer-app
+# archipelago-monitor-app
 
 Android app ("AP Monitor") that monitors several [Archipelago](https://archipelago.gg) multiworlds
 with several slots each, in the foreground and in the background, and notifies about items, hints
