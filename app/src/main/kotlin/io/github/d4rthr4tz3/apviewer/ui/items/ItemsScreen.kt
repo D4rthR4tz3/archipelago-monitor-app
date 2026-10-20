@@ -223,7 +223,8 @@ private fun ItemListRow(row: ItemRow) {
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Text(
-            text = stringResource(R.string.items_index, row.item.index),
+            // The server counts from 0; people count from 1.
+            text = stringResource(R.string.items_index, row.item.index + 1),
             modifier = Modifier.width(40.dp),
             style = MaterialTheme.typography.labelSmall,
             fontFamily = GeistMono,

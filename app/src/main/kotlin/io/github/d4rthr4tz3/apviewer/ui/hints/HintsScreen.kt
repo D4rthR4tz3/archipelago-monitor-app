@@ -12,14 +12,11 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -65,7 +62,6 @@ fun HintsList(
     state: HintsState,
     onDirectionChange: (HintDirection) -> Unit,
     onSlotChange: (String?) -> Unit,
-    onHideFoundChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -82,18 +78,12 @@ fun HintsList(
                 onSelect = onDirectionChange,
                 modifier = Modifier.fillMaxWidth(),
             )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                HintSlotPicker(
-                    slotNames = state.slotNames,
-                    selected = state.slot,
-                    onSelect = onSlotChange,
-                    modifier = Modifier.weight(1f),
-                )
-                HideFoundSwitch(checked = state.hideFound, onCheckedChange = onHideFoundChange)
-            }
+            HintSlotPicker(
+                slotNames = state.slotNames,
+                selected = state.slot,
+                onSelect = onSlotChange,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
         HorizontalDivider(color = ApColors.Divider)
         if (state.visible.isEmpty()) {
@@ -175,43 +165,6 @@ private fun HintSlotPicker(
                     },
                 )
             }
-        }
-    }
-}
-
-/** Small labeled switch of the design's filter row. */
-@Composable
-private fun HideFoundSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    Row(
-        modifier = Modifier
-            .height(40.dp)
-            .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
-            .padding(start = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = stringResource(R.string.hints_hide_found),
-            style = MaterialTheme.typography.bodySmall,
-            color = ApColors.TextSecondary,
-        )
-        Box(
-            modifier = Modifier
-                .size(width = 36.dp, height = 20.dp)
-                .background(
-                    if (checked) ApColors.TextPrimary else ApColors.SegmentActive,
-                    RoundedCornerShape(10.dp),
-                ),
-        ) {
-            Box(
-                modifier = Modifier
-                    .offset(x = if (checked) 19.dp else 3.dp, y = 3.dp)
-                    .size(14.dp)
-                    .background(
-                        if (checked) ApColors.Background else ApColors.TextTertiary,
-                        RoundedCornerShape(7.dp),
-                    ),
-            )
         }
     }
 }
@@ -513,7 +466,6 @@ private fun HintsListPreview() {
             ),
             onDirectionChange = {},
             onSlotChange = {},
-            onHideFoundChange = {},
         )
     }
 }

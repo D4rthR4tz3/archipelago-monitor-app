@@ -122,7 +122,6 @@ fun FeedRoute(multiworldId: String, onBack: () -> Unit, onEdit: () -> Unit) {
                 state = hints,
                 onDirectionChange = hintsViewModel::setDirection,
                 onSlotChange = hintsViewModel::setSlot,
-                onHideFoundChange = hintsViewModel::setHideFound,
                 modifier = modifier,
             )
         },
@@ -300,11 +299,15 @@ private fun FeedColumn(
 
             MultiworldTab.ITEMS -> itemsList(Modifier.weight(1f), onOpenItemFilter)
         }
-        // The failure card of the feed has its own reconnect button.
-        if (tab != MultiworldTab.FEED || failed == null) {
+        // The failure card of the feed has its own reconnect button. Chat goes only where its
+        // messages show up: in the feed.
+        val connected = status is MultiworldStatus.Connected
+        if ((tab != MultiworldTab.FEED || failed == null) &&
+            (tab == MultiworldTab.FEED || !connected)
+        ) {
             HorizontalDivider(color = ApColors.Divider)
             when {
-                status is MultiworldStatus.Connected -> SayBar(
+                connected -> SayBar(
                     slotNames = state.slotNames,
                     sendAs = state.sendAs,
                     onSendAsChange = onSendAsChange,
