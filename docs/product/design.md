@@ -62,7 +62,9 @@ This page records the design rules and tokens that apply to every screen.
 ### Feed highlight
 
 - Item for one of my slots: background `rgba(240, 106, 232, 0.12)`.
-- Item sent by one of my slots: background `rgba(240, 106, 232, 0.05)`.
+- Item sent by one of my slots: no background.
+- Hint: background `rgba(232, 195, 90, 0.12)`.
+- Received items are numbered from 1 in the Items tab.
 - Rows: 6 px × 8 px padding, 6 px radius, 4 px gap.
 
 ## Screens
