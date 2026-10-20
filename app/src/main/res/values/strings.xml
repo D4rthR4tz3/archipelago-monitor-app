@@ -18,6 +18,8 @@
     <string name="status_connected">Connected</string>
     <string name="status_reconnecting">Reconnecting</string>
     <string name="status_failed">Error</string>
+    <string name="status_offline">No network</string>
+    <string name="status_offline_detail">No network connection. The app connects again once the network is back.</string>
     <string name="status_reconnecting_detail">Connection lost at %1$s, attempt %2$d</string>
     <string name="status_failed_detail">%1$s: %2$s</string>
     <string name="status_with_slots">%1$s, %2$s</string>
@@ -48,6 +50,7 @@
     <string name="overview_settings">App settings</string>
     <string name="overview_connections">Connections active</string>
     <string name="overview_active_slots">%1$d of %2$d slots active</string>
+    <string name="overview_offline">No network, waiting for a connection</string>
     <string name="overview_disable_title">Turn off all connections?</string>
     <string name="overview_disable_text">All multiworlds disconnect. Chat and server messages from that time are missing from the feed; received items come in when you reconnect.</string>
     <string name="overview_disable_confirm">Turn off</string>

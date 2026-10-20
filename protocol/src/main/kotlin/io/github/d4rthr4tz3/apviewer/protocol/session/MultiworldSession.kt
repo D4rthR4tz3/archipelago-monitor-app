@@ -54,6 +54,7 @@ class MultiworldSession(
     uuid: String = UUID.randomUUID().toString(),
     private val maxFeedSize: Int = DEFAULT_MAX_FEED_SIZE,
     private val clock: () -> Long = System::currentTimeMillis,
+    online: StateFlow<Boolean> = MutableStateFlow(true),
 ) {
     private val _feed = MutableStateFlow<List<FeedEntry>>(emptyList())
     private val _receivedItems = MutableSharedFlow<SlotReceivedItem>()
@@ -80,6 +81,7 @@ class MultiworldSession(
             reconnectPolicy = reconnectPolicy,
             uuid = uuid,
             clock = clock,
+            online = online,
         )
     }
 
@@ -137,6 +139,11 @@ class MultiworldSession(
     fun stop() {
         slots.forEach(SlotConnection::stop)
         stopCollectors()
+    }
+
+    /** Closes the connections of all slots; they reconnect as after any other drop. */
+    fun dropConnections() {
+        slots.forEach { it.dropConnection() }
     }
 
     /** Ends the wait of every slot that waits to reconnect. */

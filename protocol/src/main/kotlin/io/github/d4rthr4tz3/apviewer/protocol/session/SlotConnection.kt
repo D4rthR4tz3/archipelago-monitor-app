@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.JsonElement
@@ -44,6 +45,7 @@ class SlotConnection(
     private val reconnectPolicy: ReconnectPolicy = ReconnectPolicy(),
     private val uuid: String = UUID.randomUUID().toString(),
     private val clock: () -> Long = System::currentTimeMillis,
+    private val online: StateFlow<Boolean> = MutableStateFlow(true),
 ) {
     private val _state = MutableStateFlow<SlotState>(SlotState.Idle)
     private val _messages = MutableSharedFlow<FeedMessage>()
@@ -123,6 +125,14 @@ class SlotConnection(
         return true
     }
 
+    /**
+     * Closes the current connection without waiting for it to time out, for example when the
+     * network is gone. The slot then reconnects as after any other drop.
+     */
+    fun dropConnection() {
+        socket?.close()
+    }
+
     /** Sends [text] as chat message or command. Returns `false` if not connected. */
     fun say(text: String): Boolean {
         if (_state.value !is SlotState.Connected) return false
@@ -134,13 +144,23 @@ class SlotConnection(
         var everConnected = false
         var preferredUrl: String? = null
         while (true) {
+            if (!online.value) {
+                // Attempts without a network only fail; wait until it is back instead.
+                _state.value = SlotState.Offline
+                online.first { it }
+                attempt = 0
+            }
             val outcome = connectOnce(preferredUrl)
             everConnected = everConnected || outcome.connected
             preferredUrl = outcome.url ?: preferredUrl
-            if (outcome.reason is FailureReason.Refused || !everConnected) {
+            // Without a network the server only looks unreachable, so the next round waits for it.
+            val gaveUp = !everConnected && online.value
+            if (outcome.reason is FailureReason.Refused || gaveUp) {
                 _state.value = SlotState.Failed(outcome.reason)
                 return
             }
+            // Without a network there is nothing to wait out; the loop waits for the network.
+            if (!online.value) continue
             attempt = if (outcome.connected) 1 else attempt + 1
             val delayMillis = reconnectPolicy.delayMillis(attempt)
             // A request from before this wait must not cut it short.

@@ -18,13 +18,16 @@ sealed interface MultiworldStatus {
      */
     data class Reconnecting(val attempt: Int, val sinceMillis: Long) : MultiworldStatus
 
+    /** The device has no network; the slots connect again once it is back. */
+    data object Offline : MultiworldStatus
+
     /** At least one slot was refused or the server could not be reached. */
     data class Failed(val slotName: String, val reason: FailureReason) : MultiworldStatus
 
     companion object {
         /**
-         * Combines the [states] of the slots named [slotNames]. A failure outranks a reconnect,
-         * which outranks connecting. [previous] keeps the start time of an ongoing reconnect.
+         * Combines the [states] of the slots named [slotNames]. A failure outranks a missing
+         * network, which outranks a reconnect, which outranks connecting. [previous] keeps the start time of an ongoing reconnect.
          */
         fun of(
             slotNames: List<String>,
@@ -36,6 +39,7 @@ sealed interface MultiworldStatus {
             if (failed >= 0) {
                 return Failed(slotNames[failed], (states[failed] as SlotState.Failed).reason)
             }
+            if (states.any { it is SlotState.Offline }) return Offline
             val reconnecting = states.filterIsInstance<SlotState.Reconnecting>()
             if (reconnecting.isNotEmpty()) {
                 val since = (previous as? Reconnecting)?.sinceMillis ?: nowMillis

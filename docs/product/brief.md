@@ -33,7 +33,8 @@ my slots receives an item.
   commands via `Say`. The app shows the hint status but does not change it.
 - Item flags: `0b001` progression, `0b010` useful, `0b100` trap (none: filler).
 - Android: foreground service (`foregroundServiceType="specialUse"`), `POST_NOTIFICATIONS` from
-  Android 13, reconnect with backoff plus ping, try `wss://` before `ws://`, support per-message
+  Android 13, reconnect with backoff plus ping (paused without a network, immediate once it is back
+  or the app returns), try `wss://` before `ws://`, support per-message
   compression. Notification channels per item type (off / silent / sound).
 - Stack: Kotlin, Jetpack Compose, OkHttp WebSocket, kotlinx.serialization, Room (feed, hints),
   DataStore (profiles). Alternative: Archipelago.MultiClient.Java.

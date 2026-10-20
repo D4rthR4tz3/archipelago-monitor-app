@@ -187,6 +187,8 @@ private fun ConnectionsCard(state: OverviewState, onCheckedChange: (Boolean) -> 
             .background(ApColors.Surface, MaterialTheme.shapes.medium)
             .toggleable(
                 value = state.connectionsEnabled,
+                // Without a network the switch changes nothing anyone could notice.
+                enabled = state.online,
                 role = Role.Switch,
                 onValueChange = onChange,
             )
@@ -197,19 +199,27 @@ private fun ConnectionsCard(state: OverviewState, onCheckedChange: (Boolean) -> 
             Text(
                 text = stringResource(R.string.overview_connections),
                 style = MaterialTheme.typography.labelLarge,
-                color = ApColors.TextPrimary,
+                color = if (state.online) ApColors.TextPrimary else ApColors.TextTertiary,
             )
             Text(
-                text = stringResource(
-                    R.string.overview_active_slots,
-                    state.connectedSlots,
-                    state.totalSlots,
-                ),
+                text = if (state.online) {
+                    stringResource(
+                        R.string.overview_active_slots,
+                        state.connectedSlots,
+                        state.totalSlots,
+                    )
+                } else {
+                    stringResource(R.string.overview_offline)
+                },
                 style = MaterialTheme.typography.bodySmall,
-                color = ApColors.TextSecondary,
+                color = if (state.online) ApColors.TextSecondary else ApColors.Warning,
             )
         }
-        ApSwitch(checked = state.connectionsEnabled, onCheckedChange = onChange)
+        ApSwitch(
+            checked = state.connectionsEnabled,
+            onCheckedChange = onChange,
+            enabled = state.online,
+        )
     }
 }
 
@@ -217,7 +227,7 @@ private fun ConnectionsCard(state: OverviewState, onCheckedChange: (Boolean) -> 
 private fun MultiworldListItem(row: MultiworldRow, onClick: () -> Unit) {
     val disconnected = row.status == MultiworldStatus.Disconnected
     val statusColor = when (row.status) {
-        is MultiworldStatus.Reconnecting -> ApColors.Warning
+        is MultiworldStatus.Reconnecting, MultiworldStatus.Offline -> ApColors.Warning
         is MultiworldStatus.Failed -> ApColors.Error
         MultiworldStatus.Disconnected -> ApColors.TextTertiary
         else -> ApColors.TextSecondary
