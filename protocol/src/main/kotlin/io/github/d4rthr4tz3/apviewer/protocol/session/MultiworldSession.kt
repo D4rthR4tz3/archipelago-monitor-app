@@ -54,6 +54,7 @@ class MultiworldSession(
     uuid: String = UUID.randomUUID().toString(),
     private val maxFeedSize: Int = DEFAULT_MAX_FEED_SIZE,
     private val clock: () -> Long = System::currentTimeMillis,
+    online: StateFlow<Boolean> = MutableStateFlow(true),
 ) {
     private val _feed = MutableStateFlow<List<FeedEntry>>(emptyList())
     private val _receivedItems = MutableSharedFlow<SlotReceivedItem>()
@@ -80,6 +81,7 @@ class MultiworldSession(
             reconnectPolicy = reconnectPolicy,
             uuid = uuid,
             clock = clock,
+            online = online,
         )
     }
 

@@ -693,7 +693,7 @@ private fun ConnectBar(status: MultiworldStatus, onConnect: () -> Unit) {
             style = MaterialTheme.typography.bodySmall,
             color = when (status) {
                 is MultiworldStatus.Failed -> ApColors.Error
-                is MultiworldStatus.Reconnecting -> ApColors.Warning
+                is MultiworldStatus.Reconnecting, MultiworldStatus.Offline -> ApColors.Warning
                 else -> ApColors.TextSecondary
             },
         )

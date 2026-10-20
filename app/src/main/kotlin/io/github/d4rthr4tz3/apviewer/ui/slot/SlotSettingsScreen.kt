@@ -146,6 +146,8 @@ private fun ConnectionCard(live: LiveSlot?, onConnect: () -> Unit, onDisconnect:
 
                         is SlotState.Failed -> R.string.status_failed
 
+                        SlotState.Offline -> R.string.status_offline
+
                         else -> R.string.status_disconnected
                     },
                 ),

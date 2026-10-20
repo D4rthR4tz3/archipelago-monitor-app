@@ -53,12 +53,19 @@ class AppContainer(context: Context) {
             feed.prune(profiles.profiles.first().multiworlds)
             profiles.profiles.collect { sessions.update(it) }
         }
-        // Waiting out the backoff after the network is back would delay messages for no reason.
-        context.getSystemService(ConnectivityManager::class.java)?.registerDefaultNetworkCallback(
-            object : ConnectivityManager.NetworkCallback() {
-                override fun onAvailable(network: Network) = sessions.retryNow()
-            },
-        )
+        // Without a network, slots wait instead of retrying; once it is back, they connect at once.
+        context.getSystemService(ConnectivityManager::class.java)?.let { connectivity ->
+            sessions.setOnline(connectivity.activeNetwork != null)
+            connectivity.registerDefaultNetworkCallback(
+                object : ConnectivityManager.NetworkCallback() {
+                    override fun onAvailable(network: Network) = sessions.setOnline(true)
+
+                    // When the device switches networks, the new one may already be active.
+                    override fun onLost(network: Network) =
+                        sessions.setOnline(connectivity.activeNetwork != null)
+                },
+            )
+        }
     }
 
     private companion object {
