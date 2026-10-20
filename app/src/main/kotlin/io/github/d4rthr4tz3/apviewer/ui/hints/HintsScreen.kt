@@ -47,7 +47,6 @@ import io.github.d4rthr4tz3.apviewer.protocol.model.ItemFlags
 import io.github.d4rthr4tz3.apviewer.protocol.session.MultiworldHint
 import io.github.d4rthr4tz3.apviewer.protocol.session.SlotHint
 import io.github.d4rthr4tz3.apviewer.protocol.store.ItemClass
-import io.github.d4rthr4tz3.apviewer.ui.components.ApIconButton
 import io.github.d4rthr4tz3.apviewer.ui.components.SegmentedControl
 import io.github.d4rthr4tz3.apviewer.ui.feed.itemClassStyle
 import io.github.d4rthr4tz3.apviewer.ui.theme.ApColors
@@ -248,37 +247,15 @@ private fun HintDetail(label: String, value: String, color: Color) {
 /** Landscape table of all hints, sortable by every column. */
 @Composable
 fun HintsTable(
-    name: String,
     state: HintsState,
     onSortChange: (HintColumn) -> Unit,
-    onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.fillMaxSize().padding(start = 8.dp, end = 24.dp, bottom = 8.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth().height(52.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            ApIconButton(
-                icon = R.drawable.ic_arrow_back,
-                contentDescription = stringResource(R.string.action_back),
-                onClick = onBack,
-            )
-            Text(
-                text = stringResource(R.string.tab_hints),
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.titleSmall.copy(fontSize = 16.sp),
-                fontWeight = FontWeight.SemiBold,
-            )
-            Text(
-                text = name,
-                style = MaterialTheme.typography.bodySmall,
-                color = ApColors.TextTertiary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 8.dp, end = 24.dp, top = 8.dp, bottom = 8.dp),
+    ) {
         Column(modifier = Modifier.padding(start = 16.dp)) {
             Row(modifier = Modifier.fillMaxWidth().height(36.dp)) {
                 HintColumn.entries.forEach { column ->
@@ -475,10 +452,8 @@ private fun HintsListPreview() {
 private fun HintsTablePreview() {
     ApViewerTheme {
         HintsTable(
-            name = "Zelda-Async Oktober",
             state = HintsState(connected = true, table = previewHints),
             onSortChange = {},
-            onBack = {},
         )
     }
 }
