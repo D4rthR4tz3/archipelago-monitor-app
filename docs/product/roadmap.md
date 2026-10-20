@@ -25,7 +25,7 @@ Build order towards the [brief](brief.md). Each step is one pull request.
 
 ## Steps
 
-Steps 1 to 6 are done. The background service comes last, once the app works in the foreground
+All steps are done. The background service came last, once the app worked in the foreground
 (decided 2026-10-20).
 
 1. **Design foundation**: theme tokens, Geist fonts, fixed dark theme; feed rows restyled to the
@@ -37,5 +37,7 @@ Steps 1 to 6 are done. The background service comes last, once the app works in 
 5. **Hints**: hint list and wide table, status shown read-only.
 6. **Open design points**: received items tab (new items marked until seen), item type filter
    sheet shared by feed and items, empty overview, connecting and error states of the feed.
-7. **Background service and notifications**: foreground service for all active slots, channels per
-   item type, grouped item notifications, hint notifications, ongoing status notification.
+7. **Background service and notifications**: foreground service while a multiworld kept in the
+   background is connected (others disconnect while the app is hidden), one notification per
+   multiworld for items, hints and chat mentions as the slot settings say, ongoing status
+   notification with "Pause". No notifications while the app is visible.

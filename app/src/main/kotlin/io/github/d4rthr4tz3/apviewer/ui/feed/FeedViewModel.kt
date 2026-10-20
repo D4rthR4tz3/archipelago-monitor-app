@@ -42,6 +42,11 @@ class FeedViewModel(private val container: AppContainer, private val multiworldI
 
     private val options = combine(filter, itemClasses, sendAs, ::Triple)
 
+    init {
+        // The feed shows what the notifications of this multiworld reported.
+        container.notifier.clear(multiworldId)
+    }
+
     val state: StateFlow<FeedState> = combine(
         container.profiles.profiles,
         container.sessions.status(multiworldId),

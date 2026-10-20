@@ -31,8 +31,9 @@ fun interface FeedSink {
 
 /**
  * Runs one [MultiworldSession] per saved multiworld that should be connected: those the user
- * connected, or that connect on start, while connections are enabled. Restarts a session when its
- * settings change and passes new feed messages to [feedSink].
+ * connected, or that connect on start, while connections are enabled and, in the background, only
+ * those kept in the background. Restarts a session when its settings change and passes new feed
+ * messages to [feedSink].
  */
 class SessionManager(
     private val scope: CoroutineScope,
@@ -55,6 +56,7 @@ class SessionManager(
     private val _wanted = MutableStateFlow<Set<String>?>(null)
     private val _online = MutableStateFlow(true)
     private var profiles = Profiles()
+    private var foreground = true
 
     /** Running sessions by multiworld id. */
     val sessions: StateFlow<Map<String, MultiworldSession>> = _sessions.asStateFlow()
@@ -123,6 +125,16 @@ class SessionManager(
         return failed.reason !is FailureReason.Refused
     }
 
+    /**
+     * Tells whether the app is visible. In the background, only multiworlds kept in the background
+     * stay connected; the others connect again once the app is visible.
+     */
+    @Synchronized
+    fun setForeground(value: Boolean) {
+        foreground = value
+        reconcile()
+    }
+
     /** Sends [text] to the room of multiworld [id] as [slotName]. Returns `false` if not sent. */
     fun say(id: String, slotName: String, text: String): Boolean =
         _sessions.value[id]?.say(slotName, text) ?: false
@@ -166,7 +178,7 @@ class SessionManager(
         val desired = profiles.multiworlds
             .filter {
                 profiles.settings.connectionsEnabled && it.id in wanted &&
-                    it.slots.isNotEmpty()
+                    it.slots.isNotEmpty() && (foreground || it.keepInBackground)
             }
             .associate { it.id to it.toConfig() }
         (running.keys - desired.keys).toList().forEach { id -> running.remove(id)?.stop() }
