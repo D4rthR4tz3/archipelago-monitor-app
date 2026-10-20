@@ -1,8 +1,7 @@
 # Product brief: AP Monitor
 
 Handoff notes from the initial research and design work (written by Sven, 2026-10-20). This is the
-source of truth for scope and technical direction. Design rules are in [design.md](design.md), the
-build order in [roadmap.md](roadmap.md).
+source of truth for scope and technical direction. Design rules are in [design.md](design.md).
 
 ## Goal
 
@@ -39,9 +38,3 @@ my slots receives an item.
   use a channel with sound and one without, plus channels for hints, mentions and the status.
 - Stack: Kotlin, Jetpack Compose, OkHttp WebSocket, kotlinx.serialization, Room (feed, hints),
   DataStore (profiles). Alternative: Archipelago.MultiClient.Java.
-
-## Open points
-
-- "Received items" tab per slot.
-- Item type filter for the feed (sheet) is not designed yet.
-- Empty, loading and error states are not designed yet.

@@ -190,7 +190,7 @@
     <string name="slot_count_from_now">Ab jetzt zählen</string>
     <string name="slot_remove">Slot entfernen</string>
     <string name="slot_remove_title">%1$s entfernen?</string>
-    <string name="slot_remove_text">Der Slot wird entfernt, sobald du die Multiworld speicherst.</string>
+    <string name="slot_remove_text">Der Slot und seine Einstellungen werden entfernt.</string>
 
     <string name="settings_title">Einstellungen</string>
     <string name="settings_feed_layout">Feed-Darstellung</string>
