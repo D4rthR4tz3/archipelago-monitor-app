@@ -26,9 +26,11 @@ wins.
 
 `chore/` also covers formatting, refactoring and translations.
 
-The specification also allows `feature/` and `bugfix/`; this repository uses the short forms
-`feat/` and `fix/` only, so branch types match the commit types in
-[commit messages](commit-messages.md).
+The specification also allows `feature/` and `bugfix/` (and its skill prefers them); this
+repository uses the short forms `feat/` and `fix/` only, so branch types match the commit types
+in [commit messages](commit-messages.md).
+
+When the type is unclear, use `feat/`.
 
 The branch type describes the main change of the pull request. The commits on the branch keep
 their own, more specific commit types (`docs`, `ci`, `refactor`, …).
@@ -38,11 +40,27 @@ their own, more specific commit types (`docs`, `ci`, `refactor`, …).
 - English, lowercase letters `a-z` and digits `0-9`, words separated by single hyphens.
 - Dots only inside version numbers (`release/v1.2.0`, `chore/upgrade-agp-9.4.1`).
 - No spaces, underscores, uppercase letters, or further slashes.
-- No consecutive hyphens or dots, and none at the start or end of the description.
-- Short and descriptive: two to five words that name the feature or fix, so the branch is
-  recognizable in a list. No random or generated names (`claude/project-thread-xyz`).
+- No consecutive hyphens or dots, no hyphen next to a dot (`v1.-2`), and none at the start or
+  end of the description.
+- Short and descriptive: two to five words that name the feature or fix, about 50 characters
+  for the whole branch name, so the branch is recognizable in a list.
+- Specific: `fix/header-overflow`, not `fix/bug` or `feat/new-feature`. No random or generated
+  names (`claude/project-thread-xyz`) and no personal names (`feat/john-working-on-stuff`).
 - Do not repeat the type: `fix/header-bug`, not `fix/fix-header-bug`.
 - When a GitHub issue exists, start with its number: `fix/issue-12-reconnect-loop`.
+
+## Creating a branch
+
+```sh
+git checkout main
+git pull origin main
+git checkout -b <type>/<description>
+git push -u origin <type>/<description>
+```
+
+Never create a branch named like the trunk (`main`, `master`, `develop`). When an assembled
+name breaks a rule, fix it before creating the branch: lowercase everything, replace spaces and
+underscores with hyphens, collapse repeated hyphens and strip leading or trailing ones.
 
 ## Validation
 
@@ -52,6 +70,10 @@ without the AI agent prefixes, `feature`, `bugfix`, `master` and `develop`):
 ```text
 ^(?:main|(?:feat|fix|hotfix|release|chore)/[a-z0-9]+(?:\.[a-z0-9]+)*(?:-[a-z0-9]+(?:\.[a-z0-9]+)*)*)$
 ```
+
+Branch names are not checked automatically yet. If that becomes necessary,
+[commit-check](https://github.com/commit-check/commit-check) can check them as a pre-commit
+hook or GitHub Action, configured with the types above.
 
 ## Lifecycle
 
