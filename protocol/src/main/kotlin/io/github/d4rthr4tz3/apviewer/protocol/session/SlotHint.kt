@@ -20,13 +20,6 @@ data class SlotHint(
 
 /**
  * A hint of a multiworld. [receiverIsOwn] and [finderIsOwn] tell whether one of the user's
- * connected slots receives or finds the item; only the receiver can change the [hint]'s status.
+ * connected slots receives or finds the item.
  */
-data class MultiworldHint(
-    val hint: SlotHint,
-    val receiverIsOwn: Boolean,
-    val finderIsOwn: Boolean,
-) {
-    /** Whether the user can change the status: as receiver, while the item is not found. */
-    val editable: Boolean get() = receiverIsOwn && hint.status != HintStatus.FOUND
-}
+data class MultiworldHint(val hint: SlotHint, val receiverIsOwn: Boolean, val finderIsOwn: Boolean)

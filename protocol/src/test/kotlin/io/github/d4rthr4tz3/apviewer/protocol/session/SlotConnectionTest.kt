@@ -48,6 +48,7 @@ class SlotConnectionTest {
         dataPackageCache = cache,
         reconnectPolicy = ReconnectPolicy(initialDelayMillis = 1_000, maxDelayMillis = 8_000),
         uuid = "uuid",
+        clock = { 1_000L },
     )
 
     private fun TestScope.collectItems(connection: SlotConnection): List<ReceivedItem> {
@@ -66,6 +67,17 @@ class SlotConnectionTest {
 
         val connect = factory.last.sentOf<ClientPacket.Connect>().single()
         assertEquals(listOf(ConnectionTags.TRACKER, ConnectionTags.NO_TEXT), connect.tags)
+    }
+
+    @Test
+    fun `reports the version of the server as client version`() = runTest {
+        connection().start()
+        runCurrent()
+        factory.last.receive(TestRoom.roomInfo)
+        runCurrent()
+
+        val connect = factory.last.sentOf<ClientPacket.Connect>().single()
+        assertEquals(TestRoom.roomInfo.version, connect.version)
     }
 
     @Test
@@ -115,6 +127,39 @@ class SlotConnectionTest {
 
         assertEquals(listOf(false, false, true), items.map { it.isNew })
         assertEquals(2, indexStore.lastReportedIndex(key))
+    }
+
+    @Test
+    fun `keeps the item list and its arrival times across a resync`() = runTest {
+        val connection = connection()
+        connection.start()
+        runCurrent()
+        factory.last.receive(TestRoom.roomInfo)
+        factory.last.receive(
+            TestRoom.connected(slot = 1),
+            ServerPacket.ReceivedItems(index = 0, items = listOf(TestRoom.item(1, from = 2))),
+        )
+        factory.last.receive(
+            ServerPacket.ReceivedItems(index = 1, items = listOf(TestRoom.item(2, from = 3))),
+        )
+        runCurrent()
+
+        assertEquals(listOf(0, 1), connection.items.value.map { it.index })
+        assertEquals(listOf(null, 1_000L), connection.items.value.map { it.receivedAtMillis })
+
+        factory.last.receive(
+            ServerPacket.ReceivedItems(
+                index = 0,
+                items = listOf(TestRoom.item(1, from = 2), TestRoom.item(2, from = 3)),
+            ),
+        )
+        runCurrent()
+
+        assertEquals(listOf(0, 1), connection.items.value.map { it.index })
+        assertEquals(listOf(null, 1_000L), connection.items.value.map { it.receivedAtMillis })
+
+        connection.stop()
+        assertTrue(connection.items.value.isEmpty())
     }
 
     @Test
@@ -231,6 +276,24 @@ class SlotConnectionTest {
         factory.last.drop()
         runCurrent()
         assertEquals(2_000, assertIs<SlotState.Reconnecting>(connection.state.value).delayMillis)
+    }
+
+    @Test
+    fun `retryNow ends the wait before the next attempt`() = runTest {
+        val connection = connection()
+        connection.start()
+        runCurrent()
+        factory.last.receive(TestRoom.roomInfo, TestRoom.connected(slot = 1))
+        runCurrent()
+        factory.last.drop()
+        runCurrent()
+        assertIs<SlotState.Reconnecting>(connection.state.value)
+
+        assertTrue(connection.retryNow())
+        runCurrent()
+
+        assertEquals(2, factory.sockets.size)
+        assertFalse(connection.retryNow())
     }
 
     @Test

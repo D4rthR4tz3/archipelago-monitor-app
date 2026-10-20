@@ -73,10 +73,10 @@ rules and tokens that apply everywhere.
 | Artboard      | Content                                                                          |
 | ------------- | -------------------------------------------------------------------------------- |
 | Main          | Multiworld overview: background switch with slot count, list of multiworlds with name, slots, status text, last item; button "Multiworld" |
-| Feed          | Text client: header with multiworld and status, tabs Feed / Hints, filter segments (All, For me, By me, Chat) and item type filter button, log in classic (monospace one line) or structured layout, input with "send as" slot and message field |
-| Hints         | Direction segments (I receive, I find), slot dropdown, "hide found" switch, list with item, status (menu for the receiver), receiver, finder, location, entrance |
+| Feed          | Text client: header with multiworld and status, tabs Feed / Hints, filter segments (All, For me, By me, Chat) and item type filter button, log in structured (default) or classic (monospace one line) layout, input with "send as" slot and message field |
+| Hints         | Direction segments (For me, To find), slot dropdown, "hide found" switch, list with item, status (read-only, as set when the hint was created), receiver, finder, location, entrance |
 | HintsWide     | Landscape table with sortable columns item, receiver, location, finder, entrance, status |
 | MwEdit        | Connection (name, address, port, room password, reachability test), my slots, other slots reported by the server, behavior (connect on start, keep in background, feed retention 1/7/30 days/unlimited), remove |
-| SlotSettings  | Slot status, access (slot name, password), feed highlight, notifications per item type (off / silent / sound), extras (own world items, new hints, chat mentions), synchronization (last reported item index, "count from now"), remove |
+| SlotSettings  | Slot status, access (slot name; the password is per room), feed highlight, notifications per item type (off / silent / sound), extras (own world items, new hints, chat mentions), synchronization (last reported item index, "count from now"), remove |
 | Notifications | Ongoing service notification, grouped item notifications with item name colored, hint notification with "mark as priority" action |
 | Legende       | Color legend |

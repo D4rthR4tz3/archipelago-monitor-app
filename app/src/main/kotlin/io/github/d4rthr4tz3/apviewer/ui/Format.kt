@@ -81,3 +81,45 @@ private fun refusalText(error: String): String = when (error) {
     "IncompatibleVersion" -> stringResource(R.string.error_incompatible_version)
     else -> error
 }
+
+/** Short name of a failure, such as "Verbindung abgelehnt". */
+@Composable
+fun failureTitle(reason: FailureReason): String = stringResource(
+    when (reason) {
+        is FailureReason.Unreachable -> R.string.failure_unreachable
+        is FailureReason.ConnectionLost -> R.string.failure_connection_lost
+        is FailureReason.Refused -> R.string.failure_refused
+    },
+)
+
+/** Headline of a failure, naming the refusal reason where there is one. */
+@Composable
+fun failureHeadline(reason: FailureReason): String {
+    val errors = (reason as? FailureReason.Refused)?.errors.orEmpty()
+    return when {
+        "InvalidPassword" in errors -> stringResource(R.string.failure_invalid_password)
+        "InvalidSlot" in errors -> stringResource(R.string.failure_invalid_slot)
+        "IncompatibleVersion" in errors -> stringResource(R.string.failure_incompatible_version)
+        else -> failureTitle(reason)
+    }
+}
+
+/** What went wrong with [failure] and how to fix it. */
+@Composable
+fun failureAdvice(failure: MultiworldStatus.Failed): String {
+    val errors = (failure.reason as? FailureReason.Refused)?.errors.orEmpty()
+    return when {
+        "InvalidPassword" in errors -> stringResource(R.string.failure_invalid_password_advice)
+
+        "InvalidSlot" in errors -> stringResource(
+            R.string.failure_invalid_slot_advice,
+            failure.slotName,
+        )
+
+        else -> stringResource(
+            R.string.status_failed_detail,
+            failure.slotName,
+            failureText(failure.reason),
+        )
+    }
+}

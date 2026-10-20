@@ -5,7 +5,9 @@
     <string name="action_add">Add</string>
     <string name="action_back">Back</string>
     <string name="action_cancel">Cancel</string>
+    <string name="action_reconnect">Reconnect</string>
     <string name="action_close">Close</string>
+    <string name="action_connect_now">Connect now</string>
     <string name="action_connect">Connect</string>
     <string name="action_disconnect">Disconnect</string>
     <string name="action_remove">Remove</string>
@@ -33,11 +35,26 @@
     <string name="error_invalid_password">wrong password</string>
     <string name="error_incompatible_version">incompatible version</string>
 
+    <string name="failure_refused">Connection refused</string>
+    <string name="failure_unreachable">Server unreachable</string>
+    <string name="failure_connection_lost">Connection lost</string>
+    <string name="failure_invalid_password">Wrong server password</string>
+    <string name="failure_invalid_password_advice">The server refused the connection. Check the password in the multiworld settings.</string>
+    <string name="failure_invalid_slot">Unknown slot</string>
+    <string name="failure_invalid_slot_advice">The server does not know the slot “%1$s”. Check the slot name in the multiworld settings.</string>
+    <string name="failure_incompatible_version">Incompatible version</string>
+    <string name="list_and">%1$s and %2$s</string>
+
     <string name="overview_settings">App settings</string>
     <string name="overview_connections">Connections active</string>
     <string name="overview_active_slots">%1$d of %2$d slots active</string>
+    <string name="overview_disable_title">Turn off all connections?</string>
+    <string name="overview_disable_text">All multiworlds disconnect. Chat and server messages from that time are missing from the feed; received items come in when you reconnect.</string>
+    <string name="overview_disable_confirm">Turn off</string>
     <string name="overview_multiworlds">Multiworlds</string>
-    <string name="overview_empty">No multiworld yet. Add one to start watching a room.</string>
+    <string name="overview_empty">No multiworld yet</string>
+    <string name="overview_empty_text">Add a multiworld with the server address and your slot names. The app connects as a tracker and does not disturb your game client.</string>
+    <string name="overview_empty_add">Add multiworld</string>
     <string name="overview_add">Multiworld</string>
     <string name="overview_latest_item">%1$s %2$s to %3$s</string>
     <plurals name="overview_unread">
@@ -47,8 +64,13 @@
 
     <string name="tab_feed">Feed</string>
     <string name="tab_hints">Hints</string>
+    <string name="tab_items">Items</string>
+    <string name="tab_count">(%1$d)</string>
     <string name="feed_multiworld_settings">Multiworld settings</string>
     <string name="feed_empty">No messages yet.</string>
+    <string name="feed_history">Stored history</string>
+    <string name="feed_connecting_to">Connecting to %1$s</string>
+    <string name="feed_connecting_hint">Messages appear once the connection is up.</string>
     <string name="feed_to">" to "</string>
     <string name="feed_themselves">themselves</string>
     <string name="filter_all">All</string>
@@ -56,8 +78,8 @@
     <string name="filter_from_me">From me</string>
     <string name="filter_chat">Chat</string>
     <string name="filter_item_types">Filter by item type</string>
-    <string name="hints_receive">I receive</string>
-    <string name="hints_find">I find</string>
+    <string name="hints_receive">For me</string>
+    <string name="hints_find">To find</string>
     <string name="hints_all_slots">All my slots</string>
     <string name="hints_hide_found">Hide found</string>
     <string name="hints_item">Item</string>
@@ -66,16 +88,23 @@
     <string name="hints_location">Location</string>
     <string name="hints_entrance">Entrance</string>
     <string name="hints_status">Status</string>
-    <string name="hints_change_status">Change status: %1$s</string>
     <string name="hints_sort_by">Sort by %1$s</string>
     <string name="hints_empty">No hints.</string>
     <string name="hints_offline">Hints appear once the multiworld is connected.</string>
-    <string name="hints_tab_count">(%1$d)</string>
     <string name="hint_status_priority">Priority</string>
     <string name="hint_status_open">Open</string>
     <string name="hint_status_no_priority">Not needed</string>
     <string name="hint_status_avoid">Avoid</string>
     <string name="hint_status_found">Found</string>
+    <plurals name="items_received">
+        <item quantity="one">%d item received</item>
+        <item quantity="other">%d items received</item>
+    </plurals>
+    <string name="items_index">#%1$d</string>
+    <string name="items_from_prefix">"from "</string>
+    <string name="items_empty">No items received yet.</string>
+    <string name="items_filtered">No items of these types.</string>
+    <string name="items_offline">Items appear once the multiworld is connected.</string>
     <string name="say_placeholder">Message or !hint</string>
     <string name="say_send">Send</string>
     <string name="say_as">Send as %1$s</string>
@@ -85,6 +114,9 @@
     <string name="item_class_useful">Useful</string>
     <string name="item_class_filler">Filler</string>
     <string name="item_class_trap">Trap</string>
+    <string name="item_filter_title">Item types</string>
+    <string name="item_filter_show_all">Show all</string>
+    <string name="item_filter_note">Applies to the feed and the received items. Chat and server messages always stay visible.</string>
 
     <string name="edit_title">Edit multiworld</string>
     <string name="edit_title_new">New multiworld</string>
@@ -93,7 +125,7 @@
     <string name="edit_host">Server address</string>
     <string name="edit_host_hint" translatable="false">archipelago.gg</string>
     <string name="edit_port">Port</string>
-    <string name="edit_room_password">Room password (optional)</string>
+    <string name="edit_room_password">Server password (optional)</string>
     <string name="password_none">No password</string>
     <string name="password_show">Show password</string>
     <string name="password_hide">Hide password</string>
@@ -109,7 +141,7 @@
     <string name="edit_add_slot">Add slot manually</string>
     <string name="edit_add_named_slot">Add %1$s</string>
     <string name="edit_other_slots">Other slots of this multiworld</string>
-    <string name="edit_other_slots_hint">Reported by the server. A password is only needed if the slot has one.</string>
+    <string name="edit_other_slots_hint">Reported by the server. Use + to add one as your own slot.</string>
     <string name="edit_search_slots">Search slot or game</string>
     <plurals name="edit_show_all">
         <item quantity="one">Show %d</item>
@@ -134,7 +166,6 @@
     <string name="slot_connected_hint">Runs alongside your game client</string>
     <string name="slot_access">Access</string>
     <string name="slot_name">Slot name</string>
-    <string name="slot_password">Slot password (optional)</string>
     <string name="slot_highlight">Highlight in the feed</string>
     <string name="slot_highlight_hint">Findings for and from this slot</string>
     <string name="slot_notifications">Notifications for received items</string>

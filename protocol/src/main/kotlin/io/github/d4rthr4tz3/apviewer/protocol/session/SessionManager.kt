@@ -1,7 +1,7 @@
 package io.github.d4rthr4tz3.apviewer.protocol.session
 
 import io.github.d4rthr4tz3.apviewer.protocol.client.PacketSocketFactory
-import io.github.d4rthr4tz3.apviewer.protocol.model.HintStatus
+import io.github.d4rthr4tz3.apviewer.protocol.monitor.FailureReason
 import io.github.d4rthr4tz3.apviewer.protocol.monitor.FeedEntry
 import io.github.d4rthr4tz3.apviewer.protocol.store.DataPackageCache
 import io.github.d4rthr4tz3.apviewer.protocol.store.ItemIndexStore
@@ -89,6 +89,24 @@ class SessionManager(
         reconcile()
     }
 
+    /**
+     * Retries waiting connections right away and restarts multiworlds that gave up because the
+     * server was unreachable, for example when the network is back or the app returns to the
+     * foreground. Refused connections stay failed, since retrying cannot fix them.
+     */
+    @Synchronized
+    fun retryNow() {
+        val gaveUp = running.filterValues { it.session.slots.any { slot -> slot.gaveUp() } }.keys
+        gaveUp.forEach { id -> running.remove(id)?.stop() }
+        running.values.forEach { it.session.retryNow() }
+        reconcile()
+    }
+
+    private fun SlotConnection.gaveUp(): Boolean {
+        val failed = state.value as? SlotState.Failed ?: return false
+        return failed.reason !is FailureReason.Refused
+    }
+
     /** Sends [text] to the room of multiworld [id] as [slotName]. Returns `false` if not sent. */
     fun say(id: String, slotName: String, text: String): Boolean =
         _sessions.value[id]?.say(slotName, text) ?: false
@@ -101,9 +119,12 @@ class SessionManager(
         .flatMapLatest { session -> session?.hints ?: flowOf(emptyList()) }
         .distinctUntilChanged()
 
-    /** Sets the [status] of [hint] in multiworld [id]. Returns `false` if not sent. */
-    fun updateHint(id: String, hint: SlotHint, status: HintStatus): Boolean =
-        _sessions.value[id]?.updateHint(hint, status) ?: false
+    /** Items received by [slotName] of the multiworld with [id]; empty while it is not running. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun items(id: String, slotName: String): Flow<List<ReceivedItem>> = sessions
+        .map { sessions -> sessions[id]?.slots?.firstOrNull { it.config.slotName == slotName } }
+        .distinctUntilChanged()
+        .flatMapLatest { slot -> slot?.items ?: flowOf(emptyList()) }
 
     /** Combined connection state of the multiworld with [id]. */
     @OptIn(ExperimentalCoroutinesApi::class)

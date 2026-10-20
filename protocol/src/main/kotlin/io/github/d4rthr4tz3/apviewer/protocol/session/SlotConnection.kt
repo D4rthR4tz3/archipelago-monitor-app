@@ -7,8 +7,6 @@ import io.github.d4rthr4tz3.apviewer.protocol.message.MessageRenderer
 import io.github.d4rthr4tz3.apviewer.protocol.message.NameResolver
 import io.github.d4rthr4tz3.apviewer.protocol.model.GameData
 import io.github.d4rthr4tz3.apviewer.protocol.model.Hint
-import io.github.d4rthr4tz3.apviewer.protocol.model.HintStatus
-import io.github.d4rthr4tz3.apviewer.protocol.model.NetworkVersion
 import io.github.d4rthr4tz3.apviewer.protocol.monitor.FailureReason
 import io.github.d4rthr4tz3.apviewer.protocol.packet.ClientPacket
 import io.github.d4rthr4tz3.apviewer.protocol.packet.ConnectionTags
@@ -21,7 +19,7 @@ import java.util.UUID
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -29,6 +27,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.JsonElement
 
 /**
@@ -43,15 +42,17 @@ class SlotConnection(
     private val itemIndexStore: ItemIndexStore,
     private val dataPackageCache: DataPackageCache,
     private val reconnectPolicy: ReconnectPolicy = ReconnectPolicy(),
-    private val clientVersion: NetworkVersion = DEFAULT_CLIENT_VERSION,
     private val uuid: String = UUID.randomUUID().toString(),
+    private val clock: () -> Long = System::currentTimeMillis,
 ) {
     private val _state = MutableStateFlow<SlotState>(SlotState.Idle)
     private val _messages = MutableSharedFlow<FeedMessage>()
     private val _receivedItems = MutableSharedFlow<ReceivedItem>()
+    private val _items = MutableStateFlow<List<ReceivedItem>>(emptyList())
     private val _lastReportedIndex = MutableStateFlow<Int?>(null)
     private val _hints = MutableStateFlow<List<SlotHint>>(emptyList())
     private var job: Job? = null
+    private val retry = Channel<Unit>(Channel.CONFLATED)
 
     @Volatile private var session: Session? = null
 
@@ -65,6 +66,12 @@ class SlotConnection(
 
     /** Items the slot received, on every connection, with [ReceivedItem.isNew] for new ones. */
     val receivedItems: SharedFlow<ReceivedItem> = _receivedItems.asSharedFlow()
+
+    /**
+     * All items the slot received, in index order, as last sent by the server. Kept while
+     * reconnecting and cleared by [stop].
+     */
+    val items: StateFlow<List<ReceivedItem>> = _items.asStateFlow()
 
     /**
      * Index of the last item that was reported, `-1` if none, or `null` before the first
@@ -93,6 +100,7 @@ class SlotConnection(
         socket = null
         _state.value = SlotState.Idle
         _hints.value = emptyList()
+        _items.value = emptyList()
     }
 
     /**
@@ -106,13 +114,13 @@ class SlotConnection(
     }
 
     /**
-     * Sets the [status] of the hint for [location] in the world of [findingSlot]. Only works for
-     * hints this slot receives. Returns `false` if not connected.
+     * Ends the wait before the next reconnect attempt, for example when the network is back.
+     * Returns `false` if the slot is not waiting to reconnect.
      */
-    fun updateHint(findingSlot: Int, location: Long, status: HintStatus): Boolean {
-        if (_state.value !is SlotState.Connected) return false
-        val packet = ClientPacket.UpdateHint(findingSlot, location, status.value)
-        return socket?.send(listOf(packet)) ?: false
+    fun retryNow(): Boolean {
+        if (_state.value !is SlotState.Reconnecting) return false
+        retry.trySend(Unit)
+        return true
     }
 
     /** Sends [text] as chat message or command. Returns `false` if not connected. */
@@ -135,13 +143,15 @@ class SlotConnection(
             }
             attempt = if (outcome.connected) 1 else attempt + 1
             val delayMillis = reconnectPolicy.delayMillis(attempt)
+            // A request from before this wait must not cut it short.
+            retry.tryReceive()
             _state.value = SlotState.Reconnecting(
                 attempt = attempt,
                 delayMillis = delayMillis,
                 reason = outcome.reason,
                 lastUrl = preferredUrl ?: candidateUrls(config.address).first(),
             )
-            delay(delayMillis)
+            withTimeoutOrNull(delayMillis) { retry.receive() }
         }
     }
 
@@ -258,7 +268,9 @@ class SlotConnection(
                         name = config.slotName,
                         password = config.password,
                         uuid = uuid,
-                        version = clientVersion,
+                        // Reporting the server's own version passes even a room that demands an
+                        // exact version match; trackers have no game that needs a newer client.
+                        version = packet.version,
                         itemsHandling = ItemsHandling.ALL,
                         tags = buildList {
                             add(ConnectionTags.TRACKER)
@@ -348,19 +360,23 @@ class SlotConnection(
                 socket.send(listOf(ClientPacket.Sync))
                 return
             }
-            packet.items.forEachIndexed { offset, item ->
+            val now = clock()
+            val known = _items.value
+            val received = packet.items.mapIndexed { offset, item ->
                 val index = packet.index + offset
-                _receivedItems.emit(
-                    ReceivedItem(
-                        index = index,
-                        item = item,
-                        itemName = names.itemName(item.item, ownSlot),
-                        senderName = names.playerName(item.player),
-                        locationName = names.locationName(item.location, item.player),
-                        isNew = index > lastReportedIndex,
-                    ),
+                val isNew = index > lastReportedIndex
+                ReceivedItem(
+                    index = index,
+                    item = item,
+                    itemName = names.itemName(item.item, ownSlot),
+                    senderName = names.playerName(item.player),
+                    locationName = names.locationName(item.location, item.player),
+                    isNew = isNew,
+                    receivedAtMillis = if (isNew) now else known.getOrNull(index)?.receivedAtMillis,
                 )
             }
+            _items.value = if (packet.index == 0) received else _items.value + received
+            received.forEach { _receivedItems.emit(it) }
             nextIndex = packet.index + packet.items.size
             if (nextIndex - 1 > lastReportedIndex) {
                 markReported(nextIndex - 1)
@@ -382,9 +398,6 @@ class SlotConnection(
     companion object {
         /** Default port of Archipelago servers. */
         const val DEFAULT_PORT = 38281
-
-        /** Version reported to the server; trackers without a game skip version checks. */
-        val DEFAULT_CLIENT_VERSION = NetworkVersion(major = 0, minor = 6, build = 0)
 
         /**
          * Returns the WebSocket URLs to try for [address]: the address itself if it has a scheme,
