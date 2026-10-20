@@ -35,6 +35,7 @@ class MultiworldSessionTest {
         itemIndexStore = InMemoryItemIndexStore(),
         dataPackageCache = InMemoryDataPackageCache(),
         uuid = "uuid",
+        clock = { 1_000L },
     )
 
     /** Starts [session] and completes the handshake of both slots. */
@@ -97,6 +98,7 @@ class MultiworldSessionTest {
             session.feed.value.map { it.message.highlight },
         )
         assertEquals(listOf(0L, 1L, 2L), session.feed.value.map { it.id })
+        assertEquals(listOf(1_000L), session.feed.value.map { it.receivedAtMillis }.distinct())
     }
 
     @Test

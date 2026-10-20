@@ -47,6 +47,7 @@ class MultiworldSession(
     reconnectPolicy: ReconnectPolicy = ReconnectPolicy(),
     uuid: String = UUID.randomUUID().toString(),
     private val maxFeedSize: Int = DEFAULT_MAX_FEED_SIZE,
+    private val clock: () -> Long = System::currentTimeMillis,
 ) {
     private val _feed = MutableStateFlow<List<FeedEntry>>(emptyList())
     private val _receivedItems = MutableSharedFlow<SlotReceivedItem>()
@@ -92,7 +93,11 @@ class MultiworldSession(
         val textSlot = slots.first()
         collectors += scope.launch(start = CoroutineStart.UNDISPATCHED) {
             textSlot.messages.collect { message ->
-                val entry = FeedEntry(id = nextEntryId++, message = message)
+                val entry = FeedEntry(
+                    id = nextEntryId++,
+                    message = message,
+                    receivedAtMillis = clock(),
+                )
                 _feed.update { feed -> (feed + entry).takeLast(maxFeedSize) }
             }
         }

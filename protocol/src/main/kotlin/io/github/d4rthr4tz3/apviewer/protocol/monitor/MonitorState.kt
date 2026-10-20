@@ -35,5 +35,8 @@ sealed interface FailureReason {
     data class ConnectionLost(val message: String?) : FailureReason
 }
 
-/** A [FeedMessage] with an id that is unique within one connection. */
-data class FeedEntry(val id: Long, val message: FeedMessage)
+/**
+ * A [FeedMessage] with an id that is unique within one session and the time it was received, in
+ * milliseconds since the epoch.
+ */
+data class FeedEntry(val id: Long, val message: FeedMessage, val receivedAtMillis: Long = 0)
