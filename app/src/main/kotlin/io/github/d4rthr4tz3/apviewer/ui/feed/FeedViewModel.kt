@@ -25,7 +25,7 @@ data class FeedState(
     val address: String = "",
     val slotNames: List<String> = emptyList(),
     val status: MultiworldStatus = MultiworldStatus.Disconnected,
-    val layout: FeedLayout = FeedLayout.CLASSIC,
+    val layout: FeedLayout = FeedLayout.STRUCTURED,
     val entries: List<FeedEntry> = emptyList(),
     val filter: FeedFilter = FeedFilter.ALL,
     val itemClasses: Set<ItemClass> = ItemClass.entries.toSet(),

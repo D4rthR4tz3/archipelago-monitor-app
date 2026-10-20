@@ -119,7 +119,7 @@ enum class FeedLayout {
 data class AppSettings(
     /** Master switch: when off, no multiworld is connected. */
     val connectionsEnabled: Boolean = true,
-    val feedLayout: FeedLayout = FeedLayout.CLASSIC,
+    val feedLayout: FeedLayout = FeedLayout.STRUCTURED,
 )
 
 /** Everything the user configured: saved multiworlds and settings. */
