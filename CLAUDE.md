@@ -7,7 +7,7 @@ Android app that monitors a running [Archipelago](https://archipelago.gg) multiw
 Read and follow these before writing code or committing:
 
 - [Kotlin code style](docs/conventions/kotlin-style.md): Google's Android Kotlin style guide.
-- [Commit messages](docs/conventions/commit-messages.md): Conventional Commits with gitmoji.
+- [Commit messages](docs/conventions/commit-messages.md): Conventional Commits, plain text without emoji.
 - [Attribution](docs/conventions/attribution.md): no co-authoring, no AI attribution lines.
 
 ## Project layout
