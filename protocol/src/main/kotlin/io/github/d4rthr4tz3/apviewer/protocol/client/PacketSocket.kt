@@ -7,10 +7,12 @@ import kotlinx.coroutines.flow.Flow
 /** An open connection to an Archipelago server. */
 interface PacketSocket {
     /**
-     * Packets received from the server. Completes when the server closes the connection and
-     * fails when the connection breaks. Can be collected only once.
+     * Frames received from the server, each with the packets it contained. Packets the server sends
+     * together, such as `Connected` and the initial `ReceivedItems`, arrive in one frame. Completes
+     * when the server closes the connection and fails when the connection breaks. Can be collected
+     * only once.
      */
-    val incoming: Flow<ServerPacket>
+    val incoming: Flow<List<ServerPacket>>
 
     /** Queues [packets] for sending. Returns `false` if the connection is already closed. */
     fun send(packets: List<ClientPacket>): Boolean

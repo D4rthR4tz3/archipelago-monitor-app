@@ -21,20 +21,20 @@ import okhttp3.WebSocketListener
 class OkHttpPacketSocket private constructor(private val codec: PacketCodec) :
     WebSocketListener(),
     PacketSocket {
-    private val packets = Channel<ServerPacket>(Channel.UNLIMITED)
+    private val frames = Channel<List<ServerPacket>>(Channel.UNLIMITED)
 
     @Volatile private var opening: CancellableContinuation<OkHttpPacketSocket>? = null
 
     // Set by the factory and again in onOpen, which may run before newWebSocket() returns.
     @Volatile private lateinit var webSocket: WebSocket
 
-    override val incoming: Flow<ServerPacket> = packets.receiveAsFlow()
+    override val incoming: Flow<List<ServerPacket>> = frames.receiveAsFlow()
 
     override fun send(packets: List<ClientPacket>): Boolean = webSocket.send(codec.encode(packets))
 
     override fun close() {
         webSocket.close(NORMAL_CLOSURE, null)
-        packets.close()
+        frames.close()
     }
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
@@ -45,7 +45,7 @@ class OkHttpPacketSocket private constructor(private val codec: PacketCodec) :
 
     override fun onMessage(webSocket: WebSocket, text: String) {
         try {
-            codec.decode(text).forEach(packets::trySend)
+            frames.trySend(codec.decode(text))
         } catch (e: SerializationException) {
             fail(webSocket, e)
         } catch (e: IllegalArgumentException) {
@@ -58,7 +58,7 @@ class OkHttpPacketSocket private constructor(private val codec: PacketCodec) :
     }
 
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-        packets.close()
+        frames.close()
     }
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
@@ -67,13 +67,13 @@ class OkHttpPacketSocket private constructor(private val codec: PacketCodec) :
         if (pending != null) {
             pending.resumeWithException(t)
         } else {
-            packets.close(t)
+            frames.close(t)
         }
     }
 
     private fun fail(webSocket: WebSocket, cause: Exception) {
         webSocket.cancel()
-        packets.close(cause)
+        frames.close(cause)
     }
 
     /** Opens [OkHttpPacketSocket]s with a shared [OkHttpClient]. */
