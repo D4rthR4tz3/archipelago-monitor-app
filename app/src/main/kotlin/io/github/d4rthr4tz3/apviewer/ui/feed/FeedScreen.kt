@@ -20,6 +20,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
@@ -37,6 +40,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -44,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -58,6 +63,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.d4rthr4tz3.apviewer.R
@@ -93,6 +99,7 @@ import io.github.d4rthr4tz3.apviewer.ui.statusDetail
 import io.github.d4rthr4tz3.apviewer.ui.statusWithSlots
 import io.github.d4rthr4tz3.apviewer.ui.theme.ApColors
 import io.github.d4rthr4tz3.apviewer.ui.theme.ApViewerTheme
+import kotlinx.coroutines.launch
 
 /** Tabs of a multiworld. */
 enum class MultiworldTab { FEED, HINTS, ITEMS }
@@ -133,9 +140,10 @@ fun FeedRoute(multiworldId: String, onBack: () -> Unit, onEdit: () -> Unit) {
                 onBack = onBack,
             )
         },
-        itemsList = { modifier, onOpenItemFilter ->
+        itemsList = { modifier, active, onOpenItemFilter ->
             ItemsList(
                 state = items,
+                active = active,
                 itemClasses = state.itemClasses,
                 onSlotChange = itemsViewModel::setSlot,
                 onOpenItemFilter = onOpenItemFilter,
@@ -149,8 +157,8 @@ fun FeedRoute(multiworldId: String, onBack: () -> Unit, onEdit: () -> Unit) {
 
 /**
  * Text client of a multiworld: the room's messages, filters and the chat input, the Hints tab with
- * [hintsList] and the Items tab with [itemsList]. In landscape the Hints tab fills the screen with
- * [hintsTable].
+ * [hintsList] and the Items tab with [itemsList]. Swiping left or right moves between the tabs. In
+ * landscape the Hints tab fills the screen with [hintsTable].
  */
 @Composable
 fun FeedScreen(
@@ -167,22 +175,23 @@ fun FeedScreen(
     onDisconnect: () -> Unit,
     hintsList: @Composable (Modifier) -> Unit,
     hintsTable: @Composable () -> Unit,
-    itemsList: @Composable (Modifier, onOpenItemFilter: () -> Unit) -> Unit,
+    itemsList: @Composable (Modifier, active: Boolean, onOpenItemFilter: () -> Unit) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var tab by rememberSaveable { mutableStateOf(MultiworldTab.FEED) }
+    val pagerState = rememberPagerState { MultiworldTab.entries.size }
+    val scope = rememberCoroutineScope()
     var showItemFilter by rememberSaveable { mutableStateOf(false) }
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        if (tab == MultiworldTab.HINTS && maxWidth > maxHeight) {
+        if (pagerState.settledPage == MultiworldTab.HINTS.ordinal && maxWidth > maxHeight) {
             hintsTable()
         } else {
             FeedColumn(
                 state = state,
-                tab = tab,
+                pagerState = pagerState,
                 priorityHints = priorityHints,
                 unseenItems = unseenItems,
-                onTabChange = { tab = it },
+                onTabChange = { scope.launch { pagerState.animateScrollToPage(it.ordinal) } },
                 onBack = onBack,
                 onEdit = onEdit,
                 onFilterChange = onFilterChange,
@@ -208,7 +217,7 @@ fun FeedScreen(
 @Composable
 private fun FeedColumn(
     state: FeedState,
-    tab: MultiworldTab,
+    pagerState: PagerState,
     priorityHints: Int,
     unseenItems: Int,
     onTabChange: (MultiworldTab) -> Unit,
@@ -221,7 +230,7 @@ private fun FeedColumn(
     onConnect: () -> Unit,
     onDisconnect: () -> Unit,
     hintsList: @Composable (Modifier) -> Unit,
-    itemsList: @Composable (Modifier, onOpenItemFilter: () -> Unit) -> Unit,
+    itemsList: @Composable (Modifier, active: Boolean, onOpenItemFilter: () -> Unit) -> Unit,
 ) {
     val status = state.status
     val failed = status as? MultiworldStatus.Failed
@@ -250,7 +259,7 @@ private fun FeedColumn(
             },
         )
         Tabs(
-            selected = tab,
+            pagerState = pagerState,
             counts = mapOf(
                 MultiworldTab.HINTS to priorityHints,
                 MultiworldTab.ITEMS to unseenItems,
@@ -258,65 +267,76 @@ private fun FeedColumn(
             onSelect = onTabChange,
         )
         val connecting = status == MultiworldStatus.Connecting
-        when (tab) {
-            MultiworldTab.FEED -> when {
-                failed != null -> {
-                    FailureCard(failure = failed, onEdit = onEdit, onConnect = onConnect)
-                    if (state.entries.isNotEmpty()) {
-                        Text(
-                            text = stringResource(R.string.feed_history),
-                            modifier = Modifier.padding(
-                                start = 16.dp,
-                                end = 16.dp,
-                                top = 8.dp,
-                                bottom = 6.dp,
-                            ),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = ApColors.TextTertiary,
-                        )
-                    }
-                    FeedList(state = state, modifier = Modifier.weight(1f).alpha(0.7f))
-                }
-
-                connecting && state.entries.isEmpty() -> ConnectingPanel(
-                    address = state.address,
-                    slotNames = state.slotNames,
-                    modifier = Modifier.weight(1f),
-                )
-
-                else -> {
-                    FilterBar(
-                        filter = state.filter,
-                        itemFilterActive = state.itemClasses.size < ItemClass.entries.size,
-                        onFilterChange = onFilterChange,
-                        onOpenItemFilter = onOpenItemFilter,
-                    )
-                    FeedList(state = state, modifier = Modifier.weight(1f))
-                }
-            }
-
-            MultiworldTab.HINTS -> hintsList(Modifier.weight(1f))
-
-            MultiworldTab.ITEMS -> itemsList(Modifier.weight(1f), onOpenItemFilter)
-        }
-        // The failure card of the feed has its own reconnect button. Chat goes only where its
-        // messages show up: in the feed.
         val connected = status is MultiworldStatus.Connected
-        if ((tab != MultiworldTab.FEED || failed == null) &&
-            (tab == MultiworldTab.FEED || !connected)
-        ) {
-            HorizontalDivider(color = ApColors.Divider)
-            when {
-                connected -> SayBar(
-                    slotNames = state.slotNames,
-                    sendAs = state.sendAs,
-                    onSendAsChange = onSendAsChange,
-                    onSay = onSay,
-                )
+        // Each page brings its own bottom bar, so the bar moves with the swipe. Pages leave the
+        // composition once swiped away; their saveable state, such as the chat input, is kept.
+        HorizontalPager(state = pagerState, modifier = Modifier.weight(1f)) { page ->
+            val tab = MultiworldTab.entries[page]
+            Column(modifier = Modifier.fillMaxSize()) {
+                when (tab) {
+                    MultiworldTab.FEED -> when {
+                        failed != null -> {
+                            FailureCard(failure = failed, onEdit = onEdit, onConnect = onConnect)
+                            if (state.entries.isNotEmpty()) {
+                                Text(
+                                    text = stringResource(R.string.feed_history),
+                                    modifier = Modifier.padding(
+                                        start = 16.dp,
+                                        end = 16.dp,
+                                        top = 8.dp,
+                                        bottom = 6.dp,
+                                    ),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = ApColors.TextTertiary,
+                                )
+                            }
+                            FeedList(state = state, modifier = Modifier.weight(1f).alpha(0.7f))
+                        }
 
-                connecting -> ConnectingBar(onCancel = onDisconnect)
+                        connecting && state.entries.isEmpty() -> ConnectingPanel(
+                            address = state.address,
+                            slotNames = state.slotNames,
+                            modifier = Modifier.weight(1f),
+                        )
 
-                else -> ConnectBar(status = status, onConnect = onConnect)
+                        else -> {
+                            FilterBar(
+                                filter = state.filter,
+                                itemFilterActive = state.itemClasses.size < ItemClass.entries.size,
+                                onFilterChange = onFilterChange,
+                                onOpenItemFilter = onOpenItemFilter,
+                            )
+                            FeedList(state = state, modifier = Modifier.weight(1f))
+                        }
+                    }
+
+                    MultiworldTab.HINTS -> hintsList(Modifier.weight(1f))
+
+                    MultiworldTab.ITEMS -> itemsList(
+                        Modifier.weight(1f),
+                        pagerState.settledPage == page,
+                        onOpenItemFilter,
+                    )
+                }
+                // The failure card of the feed has its own reconnect button. Chat goes only where
+                // its messages show up: in the feed.
+                if ((tab != MultiworldTab.FEED || failed == null) &&
+                    (tab == MultiworldTab.FEED || !connected)
+                ) {
+                    HorizontalDivider(color = ApColors.Divider)
+                    when {
+                        connected -> SayBar(
+                            slotNames = state.slotNames,
+                            sendAs = state.sendAs,
+                            onSendAsChange = onSendAsChange,
+                            onSay = onSay,
+                        )
+
+                        connecting -> ConnectingBar(onCancel = onDisconnect)
+
+                        else -> ConnectBar(status = status, onConnect = onConnect)
+                    }
+                }
             }
         }
     }
@@ -446,12 +466,18 @@ private fun FailureCard(
     }
 }
 
+/** Tab bar whose indicator follows [pagerState] while the tabs are swiped. */
 @Composable
 private fun Tabs(
-    selected: MultiworldTab,
+    pagerState: PagerState,
     counts: Map<MultiworldTab, Int>,
     onSelect: (MultiworldTab) -> Unit,
 ) {
+    val tabs = listOf(
+        MultiworldTab.FEED to stringResource(R.string.tab_feed),
+        MultiworldTab.HINTS to stringResource(R.string.tab_hints),
+        MultiworldTab.ITEMS to stringResource(R.string.tab_items),
+    )
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -462,28 +488,29 @@ private fun Tabs(
                     Offset(size.width, size.height - 0.5f),
                     strokeWidth = 1.dp.toPx(),
                 )
+                val tabWidth = size.width / tabs.size
+                val position = pagerState.currentPage + pagerState.currentPageOffsetFraction
+                val start = if (layoutDirection == LayoutDirection.Rtl) {
+                    size.width - (position + 1) * tabWidth
+                } else {
+                    position * tabWidth
+                }
+                val indicatorHeight = 2.dp.toPx()
+                drawRect(
+                    ApColors.TextPrimary,
+                    topLeft = Offset(start, size.height - indicatorHeight),
+                    size = Size(tabWidth, indicatorHeight),
+                )
             },
     ) {
-        listOf(
-            MultiworldTab.FEED to stringResource(R.string.tab_feed),
-            MultiworldTab.HINTS to stringResource(R.string.tab_hints),
-            MultiworldTab.ITEMS to stringResource(R.string.tab_items),
-        ).forEach { (tab, label) ->
-            val isSelected = tab == selected
+        tabs.forEach { (tab, label) ->
+            val isSelected = tab.ordinal == pagerState.currentPage
             Row(
                 modifier = Modifier
                     .weight(1f)
                     .height(48.dp)
                     .semantics { this.selected = isSelected }
-                    .clickable(role = Role.Tab) { onSelect(tab) }
-                    .drawBehind {
-                        if (isSelected) {
-                            drawRect(
-                                ApColors.TextPrimary,
-                                topLeft = Offset(0f, size.height - 2.dp.toPx()),
-                            )
-                        }
-                    },
+                    .clickable(role = Role.Tab) { onSelect(tab) },
                 horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -859,7 +886,7 @@ private fun FeedScreenPreview() {
             unseenItems = 3,
             hintsList = {},
             hintsTable = {},
-            itemsList = { _, _ -> },
+            itemsList = { _, _, _ -> },
         )
     }
 }

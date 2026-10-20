@@ -52,12 +52,14 @@ import io.github.d4rthr4tz3.apviewer.ui.theme.ContentColors
 import io.github.d4rthr4tz3.apviewer.ui.theme.GeistMono
 
 /**
- * Items one of the user's slots received, newest first, limited to [itemClasses]. While shown, the
- * slot's items count as seen through [onSeen]; [onLeave] runs when the list is hidden.
+ * Items one of the user's slots received, newest first, limited to [itemClasses]. While [active],
+ * the slot's items count as seen through [onSeen]; [onLeave] runs when the list stops being active
+ * or is hidden. A list that only peeks in during a swipe is not active.
  */
 @Composable
 fun ItemsList(
     state: ItemsState,
+    active: Boolean,
     itemClasses: Set<ItemClass>,
     onSlotChange: (String) -> Unit,
     onOpenItemFilter: () -> Unit,
@@ -66,11 +68,13 @@ fun ItemsList(
     modifier: Modifier = Modifier,
 ) {
     val latestIndex = state.rows.firstOrNull()?.item?.index ?: -1
-    LaunchedEffect(state.slot, latestIndex) {
-        state.slot?.let { onSeen(it, latestIndex) }
+    LaunchedEffect(state.slot, latestIndex, active) {
+        if (active) state.slot?.let { onSeen(it, latestIndex) }
     }
-    DisposableEffect(Unit) {
-        onDispose(onLeave)
+    DisposableEffect(active) {
+        onDispose {
+            if (active) onLeave()
+        }
     }
     val visible = remember(state.rows, itemClasses) {
         state.rows.filter { it.itemClass in itemClasses }
@@ -307,6 +311,7 @@ private fun ItemsListPreview() {
                 ),
                 newCount = 2,
             ),
+            active = true,
             itemClasses = ItemClass.entries.toSet(),
             onSlotChange = {},
             onOpenItemFilter = {},
