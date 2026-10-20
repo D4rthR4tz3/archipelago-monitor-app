@@ -1,0 +1,41 @@
+name: Lint
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+permissions: {}
+
+jobs:
+  super-linter:
+    name: Super-Linter
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: read
+      # Reports one commit status per linted language.
+      statuses: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          # Super-Linter needs the full history to find the changed files.
+          fetch-depth: 0
+          persist-credentials: false
+
+      # The slim image leaves out the .NET, Rust and PowerShell linters, which this
+      # repository does not need. Its ktlint (1.8.0) matches the version Spotless uses.
+      - name: Super-Linter
+        uses: super-linter/super-linter/slim@v9.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BRANCH: main
+          # Lint every Kotlin file, not only the changed ones, so the whole code base
+          # stays in line with docs/conventions/kotlin-style.md.
+          VALIDATE_ALL_CODEBASE: true
+          # Enabling one language disables all others. ktlint reads its rules from
+          # .editorconfig (android_studio code style, Compose function names).
+          VALIDATE_KOTLIN: true
