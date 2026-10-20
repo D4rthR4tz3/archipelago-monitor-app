@@ -71,7 +71,7 @@ This page records the design rules and tokens that apply to every screen.
 | ------------- | -------------------------------------------------------------------------------- |
 | Main          | Multiworld overview: background switch with slot count, list of multiworlds with name, slots, status text, last item; button "Multiworld" |
 | Feed          | Text client: header with multiworld and status, tabs Feed / Hints, filter segments (All, For me, By me, Chat) and item type filter button, log in classic (monospace one line) or structured layout, input with "send as" slot and message field |
-| Hints         | Direction segments (For me, From me), slot dropdown, "hide found" switch, list with item, status (read-only, as set when the hint was created), receiver, finder, location, entrance |
+| Hints         | Direction segments (For me, To find), slot dropdown, "hide found" switch, list with item, status (read-only, as set when the hint was created), receiver, finder, location, entrance |
 | HintsWide     | Landscape table with sortable columns item, receiver, location, finder, entrance, status |
 | MwEdit        | Connection (name, address, port, room password, reachability test), my slots, other slots reported by the server, behavior (connect on start, keep in background, feed retention 1/7/30 days/unlimited), remove |
 | SlotSettings  | Slot status, access (slot name; the password is per room), feed highlight, notifications per item type (off / silent / sound), extras (own world items, new hints, chat mentions), synchronization (last reported item index, "count from now"), remove |

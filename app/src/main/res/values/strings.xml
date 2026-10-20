@@ -75,7 +75,7 @@
     <string name="filter_chat">Chat</string>
     <string name="filter_item_types">Filter by item type</string>
     <string name="hints_receive">For me</string>
-    <string name="hints_find">From me</string>
+    <string name="hints_find">To find</string>
     <string name="hints_all_slots">All my slots</string>
     <string name="hints_hide_found">Hide found</string>
     <string name="hints_item">Item</string>
