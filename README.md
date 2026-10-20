@@ -1,4 +1,4 @@
-# archipelago-viewer-app
+# archipelago-monitor-app
 
 AP Monitor is an Android app that keeps an eye on your [Archipelago](https://archipelago.gg)
 multiworlds. Add as many multiworlds as you like, each with your own slots; the app connects every
