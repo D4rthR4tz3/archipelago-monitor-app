@@ -27,6 +27,7 @@ import io.github.d4rthr4tz3.apviewer.protocol.message.FeedHighlight
 import io.github.d4rthr4tz3.apviewer.protocol.message.FeedMessage
 import io.github.d4rthr4tz3.apviewer.protocol.message.MessageSegment
 import io.github.d4rthr4tz3.apviewer.protocol.message.SegmentKind
+import io.github.d4rthr4tz3.apviewer.protocol.message.hintParts
 import io.github.d4rthr4tz3.apviewer.protocol.message.itemParts
 import io.github.d4rthr4tz3.apviewer.protocol.monitor.FeedEntry
 import io.github.d4rthr4tz3.apviewer.protocol.store.ItemClass
@@ -70,11 +71,12 @@ fun ClassicFeedRow(entry: FeedEntry, modifier: Modifier = Modifier) {
     )
 }
 
-/** Item first, then sender, receiver and location; other messages as text. */
+/** Item first, then sender, receiver and location; hints alike; other messages as text. */
 @Composable
 fun StructuredFeedRow(entry: FeedEntry, modifier: Modifier = Modifier) {
     val message = entry.message
-    val parts = message.itemParts()
+    val hint = message.hintParts()
+    val parts = if (hint == null) message.itemParts() else null
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -84,7 +86,8 @@ fun StructuredFeedRow(entry: FeedEntry, modifier: Modifier = Modifier) {
     ) {
         Text(
             text = if (entry.receivedAtMillis > 0) formatClock(entry.receivedAtMillis) else "",
-            modifier = Modifier.width(42.dp),
+            // On the first line of the message, whatever its text size.
+            modifier = Modifier.width(42.dp).alignByBaseline(),
             style = MaterialTheme.typography.labelSmall.copy(
                 fontFamily = GeistMono,
                 fontSize = 11.sp,
@@ -92,42 +95,82 @@ fun StructuredFeedRow(entry: FeedEntry, modifier: Modifier = Modifier) {
             ),
             color = ApColors.TextTertiary,
         )
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            if (parts == null) {
-                Text(
+        Column(
+            modifier = Modifier.alignByBaseline(),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            when {
+                hint != null -> {
+                    ItemHeadline(hint.item)
+                    val hintFor = stringResource(R.string.feed_hint_for)
+                    val at = stringResource(R.string.feed_hint_at)
+                    DetailLine(
+                        buildAnnotatedString {
+                            append(hintFor)
+                            appendSegment(hint.receiver)
+                            hint.finder?.let {
+                                append(at)
+                                appendSegment(it)
+                            }
+                            hint.location?.let {
+                                append(", ")
+                                appendSegment(it)
+                            }
+                            hint.status?.let {
+                                append(' ')
+                                appendSegment(it)
+                            }
+                        },
+                    )
+                }
+
+                parts != null -> {
+                    ItemHeadline(parts.item)
+                    val receiver = parts.receiver
+                    val to = stringResource(R.string.feed_to)
+                    val themselves = stringResource(R.string.feed_themselves)
+                    DetailLine(
+                        buildAnnotatedString {
+                            appendSegment(parts.sender)
+                            append(to)
+                            if (receiver != null) appendSegment(receiver) else append(themselves)
+                            parts.location?.let {
+                                append(", ")
+                                appendSegment(it)
+                            }
+                        },
+                    )
+                }
+
+                else -> Text(
                     text = message.segments.toAnnotatedString(baseColor(message)),
                     style = MaterialTheme.typography.bodySmall,
-                )
-            } else {
-                val style = itemClassStyle(ItemClass.of(parts.item.itemFlags))
-                Text(
-                    text = parts.item.text,
-                    style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 18.sp),
-                    color = style.color,
-                    fontWeight = style.weight,
-                )
-                val receiver = parts.receiver
-                val to = stringResource(R.string.feed_to)
-                val themselves = stringResource(R.string.feed_themselves)
-                val text = buildAnnotatedString {
-                    appendSegment(parts.sender)
-                    append(to)
-                    if (receiver != null) appendSegment(receiver) else append(themselves)
-                    parts.location?.let {
-                        append(", ")
-                        appendSegment(it)
-                    }
-                }
-                Text(
-                    text = text,
-                    style = MaterialTheme.typography.labelSmall.copy(lineHeight = 16.sp),
-                    color = ApColors.TextTertiary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
     }
+}
+
+@Composable
+private fun ItemHeadline(item: MessageSegment) {
+    val style = itemClassStyle(ItemClass.of(item.itemFlags))
+    Text(
+        text = item.text,
+        style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 18.sp),
+        color = style.color,
+        fontWeight = style.weight,
+    )
+}
+
+@Composable
+private fun DetailLine(text: AnnotatedString) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall.copy(lineHeight = 16.sp),
+        color = ApColors.TextTertiary,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
 }
 
 private fun FeedEntry.toAnnotatedString(): AnnotatedString = buildAnnotatedString {
