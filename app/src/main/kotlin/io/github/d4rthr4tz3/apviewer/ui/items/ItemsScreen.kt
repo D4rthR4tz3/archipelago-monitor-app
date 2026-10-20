@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -141,10 +142,14 @@ fun ItemsList(
                 )
             }
         } else {
-            LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                items(visible, key = { it.item.index }) { row ->
-                    ItemListRow(row = row)
-                    HorizontalDivider(color = ApColors.Divider)
+            // Each slot gets a list of its own that starts at the top. Item indices repeat across
+            // slots, so a shared list state would keep the previous slot's position by its key.
+            key(state.slot) {
+                LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    items(visible, key = { it.item.index }) { row ->
+                        ItemListRow(row = row)
+                        HorizontalDivider(color = ApColors.Divider)
+                    }
                 }
             }
         }
