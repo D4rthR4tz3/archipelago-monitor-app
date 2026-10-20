@@ -53,6 +53,7 @@ class SlotConnection(
     private val _items = MutableStateFlow<List<ReceivedItem>>(emptyList())
     private val _lastReportedIndex = MutableStateFlow<Int?>(null)
     private val _hints = MutableStateFlow<List<SlotHint>>(emptyList())
+    private val _newHints = MutableSharedFlow<SlotHint>()
     private var job: Job? = null
     private val retry = Channel<Unit>(Channel.CONFLATED)
 
@@ -86,6 +87,12 @@ class SlotConnection(
      * cleared by [stop].
      */
     val hints: StateFlow<List<SlotHint>> = _hints.asStateFlow()
+
+    /**
+     * Hints for items this slot receives that someone made while connected. Hints the server sends
+     * on connecting are known already and not emitted.
+     */
+    val newHints: SharedFlow<SlotHint> = _newHints.asSharedFlow()
 
     /** Connects, or reconnects if already started. */
     fun start() {
@@ -260,10 +267,12 @@ class SlotConnection(
                     }
 
                     is ServerPacket.Retrieved -> hintsKey?.let { key ->
-                        if (key in packet.keys) onHints(packet.keys[key])
+                        if (key in packet.keys) onHints(packet.keys[key], live = false)
                     }
 
-                    is ServerPacket.SetReply -> if (packet.key == hintsKey) onHints(packet.value)
+                    is ServerPacket.SetReply -> if (packet.key == hintsKey) {
+                        onHints(packet.value, live = true)
+                    }
 
                     is ServerPacket.Unknown -> Unit
                 }
@@ -346,8 +355,9 @@ class SlotConnection(
             )
         }
 
-        private fun onHints(value: JsonElement?) {
-            _hints.value = Hint.listFrom(value).map { hint ->
+        private suspend fun onHints(value: JsonElement?, live: Boolean) {
+            val known = _hints.value.map { it.findingSlot to it.locationId }.toSet()
+            val hints = Hint.listFrom(value).map { hint ->
                 SlotHint(
                     receivingSlot = hint.receivingPlayer,
                     receiverName = names.playerName(hint.receivingPlayer),
@@ -362,6 +372,13 @@ class SlotConnection(
                     status = hint.hintStatus,
                 )
             }
+            _hints.value = hints
+            if (!live) return
+            hints
+                .filter {
+                    it.receivingSlot == ownSlot && (it.findingSlot to it.locationId) !in known
+                }
+                .forEach { _newHints.emit(it) }
         }
 
         /**
