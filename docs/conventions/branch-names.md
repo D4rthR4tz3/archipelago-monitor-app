@@ -71,9 +71,8 @@ without the AI agent prefixes, `feature`, `bugfix`, `master` and `develop`):
 ^(?:main|(?:feat|fix|hotfix|release|chore)/[a-z0-9]+(?:\.[a-z0-9]+)*(?:-[a-z0-9]+(?:\.[a-z0-9]+)*)*)$
 ```
 
-Branch names are not checked automatically yet. If that becomes necessary,
-[commit-check](https://github.com/commit-check/commit-check) can check them as a pre-commit
-hook or GitHub Action, configured with the types above.
+The workflow [`branch-name.yml`](../../.github/workflows/branch-name.yml) checks every push
+and pull request against this expression and fails for any other branch name.
 
 ## Lifecycle
 
