@@ -29,6 +29,7 @@ fun statusLabel(status: MultiworldStatus): String = when (status) {
     is MultiworldStatus.Connected -> stringResource(R.string.status_connected)
     is MultiworldStatus.Reconnecting -> stringResource(R.string.status_reconnecting)
     is MultiworldStatus.Failed -> stringResource(R.string.status_failed)
+    MultiworldStatus.Offline -> stringResource(R.string.status_offline)
 }
 
 /** Detail of [status] worth a line of its own, or `null`. */
@@ -45,6 +46,8 @@ fun statusDetail(status: MultiworldStatus): String? = when (status) {
         status.slotName,
         failureText(status.reason),
     )
+
+    MultiworldStatus.Offline -> stringResource(R.string.status_offline_detail)
 
     else -> null
 }

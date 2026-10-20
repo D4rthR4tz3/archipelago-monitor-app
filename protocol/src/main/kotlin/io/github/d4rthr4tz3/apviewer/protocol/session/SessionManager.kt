@@ -53,10 +53,14 @@ class SessionManager(
     private val running = mutableMapOf<String, Running>()
     private val _sessions = MutableStateFlow<Map<String, MultiworldSession>>(emptyMap())
     private val _wanted = MutableStateFlow<Set<String>?>(null)
+    private val _online = MutableStateFlow(true)
     private var profiles = Profiles()
 
     /** Running sessions by multiworld id. */
     val sessions: StateFlow<Map<String, MultiworldSession>> = _sessions.asStateFlow()
+
+    /** Whether the device has a network; without one, slots wait instead of retrying. */
+    val online: StateFlow<Boolean> = _online.asStateFlow()
 
     /** Ids of the multiworlds the user wants connected; `null` until the first [update]. */
     val wanted: StateFlow<Set<String>?> = _wanted.asStateFlow()
@@ -87,6 +91,15 @@ class SessionManager(
     fun disconnect(id: String) {
         _wanted.value = _wanted.value.orEmpty() - id
         reconcile()
+    }
+
+    /**
+     * Tells whether the device has a network. Without one, waiting slots show that and stop
+     * retrying; once it is back, they connect right away.
+     */
+    fun setOnline(value: Boolean) {
+        _online.value = value
+        retryNow()
     }
 
     /**
@@ -174,6 +187,7 @@ class SessionManager(
             reconnectPolicy = reconnectPolicy,
             uuid = uuid,
             clock = clock,
+            online = online,
         )
         // Started before the session so that no message of the first frame is missed.
         val job = scope.launch(start = CoroutineStart.UNDISPATCHED) {

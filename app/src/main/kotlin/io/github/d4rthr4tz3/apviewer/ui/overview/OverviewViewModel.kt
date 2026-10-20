@@ -29,6 +29,8 @@ data class OverviewState(
     val loaded: Boolean = false,
     val rows: List<MultiworldRow> = emptyList(),
     val connectionsEnabled: Boolean = true,
+    /** Whether the device has a network. */
+    val online: Boolean = true,
 ) {
     val connectedSlots: Int get() = rows.sumOf {
         (it.status as? MultiworldStatus.Connected)?.slots
@@ -64,6 +66,7 @@ class OverviewViewModel(private val container: AppContainer) : ViewModel() {
                 combine(rows) { OverviewState(true, it.toList(), connectionsEnabled) }
             }
         }
+        .combine(container.sessions.online) { state, online -> state.copy(online = online) }
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),

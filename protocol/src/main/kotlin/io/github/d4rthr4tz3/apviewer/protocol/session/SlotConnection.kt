@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.JsonElement
@@ -44,6 +45,7 @@ class SlotConnection(
     private val reconnectPolicy: ReconnectPolicy = ReconnectPolicy(),
     private val uuid: String = UUID.randomUUID().toString(),
     private val clock: () -> Long = System::currentTimeMillis,
+    private val online: StateFlow<Boolean> = MutableStateFlow(true),
 ) {
     private val _state = MutableStateFlow<SlotState>(SlotState.Idle)
     private val _messages = MutableSharedFlow<FeedMessage>()
@@ -134,10 +136,18 @@ class SlotConnection(
         var everConnected = false
         var preferredUrl: String? = null
         while (true) {
+            if (!online.value) {
+                // Attempts without a network only fail; wait until it is back instead.
+                _state.value = SlotState.Offline
+                online.first { it }
+                attempt = 0
+            }
             val outcome = connectOnce(preferredUrl)
             everConnected = everConnected || outcome.connected
             preferredUrl = outcome.url ?: preferredUrl
-            if (outcome.reason is FailureReason.Refused || !everConnected) {
+            // Without a network the server only looks unreachable, so the next round waits for it.
+            val gaveUp = !everConnected && online.value
+            if (outcome.reason is FailureReason.Refused || gaveUp) {
                 _state.value = SlotState.Failed(outcome.reason)
                 return
             }

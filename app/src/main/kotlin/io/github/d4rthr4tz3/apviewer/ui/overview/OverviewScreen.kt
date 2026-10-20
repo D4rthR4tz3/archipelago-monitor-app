@@ -200,13 +200,23 @@ private fun ConnectionsCard(state: OverviewState, onCheckedChange: (Boolean) -> 
                 color = ApColors.TextPrimary,
             )
             Text(
-                text = stringResource(
-                    R.string.overview_active_slots,
-                    state.connectedSlots,
-                    state.totalSlots,
-                ),
+                text = if (state.online || !state.connectionsEnabled) {
+                    stringResource(
+                        R.string.overview_active_slots,
+                        state.connectedSlots,
+                        state.totalSlots,
+                    )
+                } else {
+                    stringResource(R.string.overview_offline)
+                },
                 style = MaterialTheme.typography.bodySmall,
-                color = ApColors.TextSecondary,
+                color = if (state.online ||
+                    !state.connectionsEnabled
+                ) {
+                    ApColors.TextSecondary
+                } else {
+                    ApColors.Warning
+                },
             )
         }
         ApSwitch(checked = state.connectionsEnabled, onCheckedChange = onChange)
@@ -217,7 +227,7 @@ private fun ConnectionsCard(state: OverviewState, onCheckedChange: (Boolean) -> 
 private fun MultiworldListItem(row: MultiworldRow, onClick: () -> Unit) {
     val disconnected = row.status == MultiworldStatus.Disconnected
     val statusColor = when (row.status) {
-        is MultiworldStatus.Reconnecting -> ApColors.Warning
+        is MultiworldStatus.Reconnecting, MultiworldStatus.Offline -> ApColors.Warning
         is MultiworldStatus.Failed -> ApColors.Error
         MultiworldStatus.Disconnected -> ApColors.TextTertiary
         else -> ApColors.TextSecondary

@@ -85,7 +85,7 @@ class ArchipelagoMonitor(
     }
 
     private fun SlotState.toMonitorState(): MonitorState = when (this) {
-        SlotState.Idle -> MonitorState.Disconnected
+        SlotState.Idle, SlotState.Offline -> MonitorState.Disconnected
 
         is SlotState.Connecting -> MonitorState.Connecting(url)
 
