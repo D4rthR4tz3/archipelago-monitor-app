@@ -26,6 +26,11 @@ sealed interface ClientPacket {
     @SerialName("GetDataPackage")
     data class GetDataPackage(val games: List<String>) : ClientPacket
 
+    /** Sends a chat message or a `!command` to the room. */
+    @Serializable
+    @SerialName("Say")
+    data class Say(val text: String) : ClientPacket
+
     /** Asks the server to resend all received items. */
     @Serializable
     @SerialName("Sync")
@@ -47,4 +52,7 @@ object ConnectionTags {
 
     /** Marks a client that only reads and sends text. */
     const val TEXT_ONLY = "TextOnly"
+
+    /** Asks the server not to send `PrintJSON` text to this connection. */
+    const val NO_TEXT = "NoText"
 }
