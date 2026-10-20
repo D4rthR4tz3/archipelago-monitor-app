@@ -16,6 +16,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotSame
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
@@ -62,6 +63,26 @@ class SessionManagerTest {
 
         assertNotSame(failed, manager.sessions.value.getValue("zelda"))
         assertEquals(1, offlineFactory.sockets.size)
+    }
+
+    @Test
+    fun `losing the network closes connections and waits`() = runTest {
+        val manager = manager()
+        manager.update(Profiles(multiworlds = listOf(zelda)))
+        runCurrent()
+        factory.last.receive(TestRoom.roomInfo, TestRoom.connected(slot = 1))
+        runCurrent()
+
+        manager.setOnline(false)
+        runCurrent()
+
+        val slot = manager.sessions.value.getValue("zelda").slots.single()
+        assertEquals(SlotState.Offline, slot.state.value)
+        assertTrue(factory.last.closed)
+
+        manager.setOnline(true)
+        runCurrent()
+        assertEquals(2, factory.sockets.size)
     }
 
     @Test
