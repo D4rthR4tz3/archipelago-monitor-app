@@ -42,7 +42,7 @@ data class ItemParts(
 
 /** Splits an item message into its parts, or returns `null` if it is not about an item. */
 fun FeedMessage.itemParts(): ItemParts? {
-    if (item == null) return null
+    if (item == null || type == HINT_TYPE) return null
     val itemSegment = segments.firstOrNull { it.kind == SegmentKind.ITEM } ?: return null
     val players = segments.filter {
         it.kind == SegmentKind.PLAYER ||
@@ -56,3 +56,37 @@ fun FeedMessage.itemParts(): ItemParts? {
         location = segments.firstOrNull { it.kind == SegmentKind.LOCATION },
     )
 }
+
+/** The parts of a hint message, for layouts that show the item first. */
+data class HintParts(
+    val item: MessageSegment,
+    val receiver: MessageSegment,
+    val finder: MessageSegment?,
+    val location: MessageSegment?,
+    val entrance: MessageSegment?,
+    /** The status, such as "(priority)", if the server sent one. */
+    val status: MessageSegment?,
+)
+
+/**
+ * Splits a hint message ("Link's Hookshot is at Swamp in Samus's World.") into its parts, or returns
+ * `null` if it is not a hint.
+ */
+fun FeedMessage.hintParts(): HintParts? {
+    if (type != HINT_TYPE) return null
+    val itemSegment = segments.firstOrNull { it.kind == SegmentKind.ITEM } ?: return null
+    val players = segments.filter {
+        it.kind == SegmentKind.PLAYER ||
+            it.kind == SegmentKind.OWN_PLAYER
+    }
+    return HintParts(
+        item = itemSegment,
+        receiver = players.firstOrNull() ?: return null,
+        finder = players.getOrNull(1),
+        location = segments.firstOrNull { it.kind == SegmentKind.LOCATION },
+        entrance = segments.firstOrNull { it.kind == SegmentKind.ENTRANCE },
+        status = segments.firstOrNull { it.kind == SegmentKind.HINT_STATUS },
+    )
+}
+
+private const val HINT_TYPE = "Hint"
