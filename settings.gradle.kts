@@ -20,7 +20,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "archipelago-viewer-app"
+rootProject.name = "archipelago-monitor-app"
 
 include(":app")
 include(":protocol")
