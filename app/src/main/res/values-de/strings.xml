@@ -74,6 +74,8 @@
     <string name="feed_connecting_hint">Nachrichten erscheinen, sobald die Verbindung steht.</string>
     <string name="feed_to">" an "</string>
     <string name="feed_themselves">sich selbst</string>
+    <string name="feed_hint_for">"Hint für "</string>
+    <string name="feed_hint_at">" bei "</string>
     <string name="filter_all">Alle</string>
     <string name="filter_for_me">Für mich</string>
     <string name="filter_from_me">Von mir</string>

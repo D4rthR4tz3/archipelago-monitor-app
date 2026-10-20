@@ -74,4 +74,31 @@ class FeedFilterTest {
         assertEquals("Link", found.itemParts()?.sender?.text)
         assertNull(found.itemParts()?.receiver)
     }
+
+    @Test
+    fun `splits hint messages into their parts`() {
+        val hint = sent.copy(
+            type = "Hint",
+            segments = listOf(
+                MessageSegment("Link", SegmentKind.OWN_PLAYER),
+                MessageSegment("'s "),
+                MessageSegment("Glove", SegmentKind.ITEM, ItemFlags.PROGRESSION),
+                MessageSegment(" is at "),
+                MessageSegment("Kakariko Well", SegmentKind.LOCATION),
+                MessageSegment(" in "),
+                MessageSegment("Samus", SegmentKind.PLAYER),
+                MessageSegment("'s World. "),
+                MessageSegment("(priority)", SegmentKind.HINT_STATUS),
+            ),
+        )
+
+        val parts = hint.hintParts()!!
+        assertEquals("Glove", parts.item.text)
+        assertEquals("Link", parts.receiver.text)
+        assertEquals("Samus", parts.finder?.text)
+        assertEquals("Kakariko Well", parts.location?.text)
+        assertEquals("(priority)", parts.status?.text)
+        assertNull(hint.itemParts())
+        assertNull(sent.hintParts())
+    }
 }
