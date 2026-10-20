@@ -19,7 +19,7 @@ kotlin {
 dependencies {
     api(libs.kotlinx.coroutines.core)
     api(libs.okhttp)
-    implementation(libs.kotlinx.serialization.json)
+    api(libs.kotlinx.serialization.json)
 
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
