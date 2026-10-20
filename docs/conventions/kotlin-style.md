@@ -12,6 +12,12 @@ code style (configured in `.editorconfig`) through Spotless:
 ./gradlew spotlessApply   # fixes what can be fixed automatically
 ```
 
+The [`super-linter.yml`](../../.github/workflows/super-linter.yml) workflow runs the same ktlint
+version through [Super-Linter](https://github.com/super-linter/super-linter) on every push and
+pull request and fails when a Kotlin file (`.kt` or `.kts`) breaks a rule. Run
+`./gradlew spotlessApply` before pushing to fix formatting violations. When the ktlint version in
+`gradle/libs.versions.toml` changes, update Super-Linter to a release that ships the same version.
+
 ## Source files
 
 - UTF-8 encoding, file names in PascalCase ending in `.kt`.
