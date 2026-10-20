@@ -20,6 +20,11 @@ class MultiworldStatusTest {
     ) = MultiworldStatus.of(names, states.toList(), previous, nowMillis = 5_000)
 
     @Test
+    fun `a slot waiting for the network makes the multiworld offline`() {
+        assertEquals(MultiworldStatus.Offline, of(reconnecting, SlotState.Offline))
+    }
+
+    @Test
     fun `all idle is disconnected`() {
         assertEquals(MultiworldStatus.Disconnected, of(SlotState.Idle, SlotState.Idle))
     }

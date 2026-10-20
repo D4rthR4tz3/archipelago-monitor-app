@@ -186,7 +186,7 @@ private fun LiveStatusCard(status: MultiworldStatus, onConnect: () -> Unit) {
                 style = MaterialTheme.typography.labelLarge,
                 color = when (status) {
                     is MultiworldStatus.Failed -> ApColors.Error
-                    is MultiworldStatus.Reconnecting -> ApColors.Warning
+                    is MultiworldStatus.Reconnecting, MultiworldStatus.Offline -> ApColors.Warning
                     else -> ApColors.TextPrimary
                 },
             )
@@ -199,7 +199,7 @@ private fun LiveStatusCard(status: MultiworldStatus, onConnect: () -> Unit) {
             }
         }
         val action = when (status) {
-            MultiworldStatus.Connecting -> null
+            MultiworldStatus.Connecting, MultiworldStatus.Offline -> null
             MultiworldStatus.Disconnected, is MultiworldStatus.Failed -> R.string.action_connect
             is MultiworldStatus.Reconnecting -> R.string.action_connect_now
             is MultiworldStatus.Connected -> R.string.action_reconnect

@@ -19,6 +19,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
@@ -32,6 +33,8 @@ class SlotConnectionTest {
     private val indexStore = InMemoryItemIndexStore()
     private val cache = InMemoryDataPackageCache()
     private val key = SlotKey(server = "localhost:38281", seedName = "seed", team = 0, slot = 1)
+
+    private val online = MutableStateFlow(true)
 
     private fun TestScope.connection(
         receivesText: Boolean = true,
@@ -49,6 +52,7 @@ class SlotConnectionTest {
         reconnectPolicy = ReconnectPolicy(initialDelayMillis = 1_000, maxDelayMillis = 8_000),
         uuid = "uuid",
         clock = { 1_000L },
+        online = online,
     )
 
     private fun TestScope.collectItems(connection: SlotConnection): List<ReceivedItem> {
@@ -294,6 +298,43 @@ class SlotConnectionTest {
 
         assertEquals(2, factory.sockets.size)
         assertFalse(connection.retryNow())
+    }
+
+    @Test
+    fun `waits for the network instead of trying without one`() = runTest {
+        online.value = false
+        val connection = connection()
+        connection.start()
+        runCurrent()
+
+        assertEquals(SlotState.Offline, connection.state.value)
+        assertTrue(factory.opened.isEmpty())
+
+        online.value = true
+        runCurrent()
+        assertEquals(1, factory.sockets.size)
+    }
+
+    @Test
+    fun `stops retrying while the network is gone`() = runTest {
+        val connection = connection()
+        connection.start()
+        runCurrent()
+        factory.last.receive(TestRoom.roomInfo, TestRoom.connected(slot = 1))
+        runCurrent()
+        online.value = false
+        factory.last.drop()
+        runCurrent()
+        connection.retryNow()
+        runCurrent()
+
+        assertEquals(SlotState.Offline, connection.state.value)
+        advanceTimeBy(600_000)
+        assertEquals(1, factory.sockets.size)
+
+        online.value = true
+        runCurrent()
+        assertEquals(2, factory.sockets.size)
     }
 
     @Test

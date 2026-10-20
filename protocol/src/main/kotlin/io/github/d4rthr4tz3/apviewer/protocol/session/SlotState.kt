@@ -46,6 +46,9 @@ sealed interface SlotState {
         val lastUrl: String,
     ) : SlotState
 
+    /** The device has no network; the next attempt starts once it is back. */
+    data object Offline : SlotState
+
     /** The slot was refused, or the server could not be reached on the first attempt. */
     data class Failed(val reason: FailureReason) : SlotState
 }
