@@ -100,6 +100,13 @@ class SessionManager(
         .flatMapLatest { session -> session?.hints ?: flowOf(emptyList()) }
         .distinctUntilChanged()
 
+    /** Items received by [slotName] of the multiworld with [id]; empty while it is not running. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun items(id: String, slotName: String): Flow<List<ReceivedItem>> = sessions
+        .map { sessions -> sessions[id]?.slots?.firstOrNull { it.config.slotName == slotName } }
+        .distinctUntilChanged()
+        .flatMapLatest { slot -> slot?.items ?: flowOf(emptyList()) }
+
     /** Combined connection state of the multiworld with [id]. */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun status(id: String): Flow<MultiworldStatus> = sessions

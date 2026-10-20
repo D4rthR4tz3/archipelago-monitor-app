@@ -24,6 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -78,6 +80,7 @@ fun OverviewScreen(
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val empty = state.loaded && state.rows.isEmpty()
     Box(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             ScreenHeader(
@@ -90,15 +93,10 @@ fun OverviewScreen(
                     )
                 },
             )
-            ConnectionsCard(state = state, onCheckedChange = onConnectionsEnabledChange)
-            if (state.loaded && state.rows.isEmpty()) {
-                Text(
-                    text = stringResource(R.string.overview_empty),
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = ApColors.TextTertiary,
-                )
+            if (empty) {
+                EmptyOverview(onAddMultiworld = onAddMultiworld, modifier = Modifier.weight(1f))
             } else if (state.rows.isNotEmpty()) {
+                ConnectionsCard(state = state, onCheckedChange = onConnectionsEnabledChange)
                 SectionTitle(
                     text = stringResource(R.string.overview_multiworlds),
                     modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 8.dp),
@@ -112,14 +110,46 @@ fun OverviewScreen(
                 }
             }
         }
+        if (state.rows.isNotEmpty()) {
+            PrimaryButton(
+                text = stringResource(R.string.overview_add),
+                onClick = onAddMultiworld,
+                icon = R.drawable.ic_add,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 16.dp, bottom = 24.dp)
+                    .height(56.dp),
+            )
+        }
+    }
+}
+
+/** First start: what the app does and the button to add a multiworld. */
+@Composable
+private fun EmptyOverview(onAddMultiworld: () -> Unit, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 32.dp, end = 32.dp, bottom = 120.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+    ) {
+        Text(
+            text = stringResource(R.string.overview_empty),
+            modifier = Modifier.semantics { heading() },
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = ApColors.TextPrimary,
+        )
+        Text(
+            text = stringResource(R.string.overview_empty_text),
+            style = MaterialTheme.typography.bodyLarge,
+            color = ApColors.TextSecondary,
+        )
         PrimaryButton(
-            text = stringResource(R.string.overview_add),
+            text = stringResource(R.string.overview_empty_add),
             onClick = onAddMultiworld,
             icon = R.drawable.ic_add,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 16.dp, bottom = 24.dp)
-                .height(56.dp),
+            modifier = Modifier.padding(top = 12.dp).height(48.dp),
         )
     }
 }

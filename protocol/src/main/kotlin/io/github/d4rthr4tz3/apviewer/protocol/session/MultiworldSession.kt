@@ -79,6 +79,7 @@ class MultiworldSession(
             dataPackageCache = dataPackageCache,
             reconnectPolicy = reconnectPolicy,
             uuid = uuid,
+            clock = clock,
         )
     }
 

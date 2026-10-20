@@ -44,10 +44,12 @@ class SlotConnection(
     private val reconnectPolicy: ReconnectPolicy = ReconnectPolicy(),
     private val clientVersion: NetworkVersion = DEFAULT_CLIENT_VERSION,
     private val uuid: String = UUID.randomUUID().toString(),
+    private val clock: () -> Long = System::currentTimeMillis,
 ) {
     private val _state = MutableStateFlow<SlotState>(SlotState.Idle)
     private val _messages = MutableSharedFlow<FeedMessage>()
     private val _receivedItems = MutableSharedFlow<ReceivedItem>()
+    private val _items = MutableStateFlow<List<ReceivedItem>>(emptyList())
     private val _lastReportedIndex = MutableStateFlow<Int?>(null)
     private val _hints = MutableStateFlow<List<SlotHint>>(emptyList())
     private var job: Job? = null
@@ -64,6 +66,12 @@ class SlotConnection(
 
     /** Items the slot received, on every connection, with [ReceivedItem.isNew] for new ones. */
     val receivedItems: SharedFlow<ReceivedItem> = _receivedItems.asSharedFlow()
+
+    /**
+     * All items the slot received, in index order, as last sent by the server. Kept while
+     * reconnecting and cleared by [stop].
+     */
+    val items: StateFlow<List<ReceivedItem>> = _items.asStateFlow()
 
     /**
      * Index of the last item that was reported, `-1` if none, or `null` before the first
@@ -92,6 +100,7 @@ class SlotConnection(
         socket = null
         _state.value = SlotState.Idle
         _hints.value = emptyList()
+        _items.value = emptyList()
     }
 
     /**
@@ -337,19 +346,23 @@ class SlotConnection(
                 socket.send(listOf(ClientPacket.Sync))
                 return
             }
-            packet.items.forEachIndexed { offset, item ->
+            val now = clock()
+            val known = _items.value
+            val received = packet.items.mapIndexed { offset, item ->
                 val index = packet.index + offset
-                _receivedItems.emit(
-                    ReceivedItem(
-                        index = index,
-                        item = item,
-                        itemName = names.itemName(item.item, ownSlot),
-                        senderName = names.playerName(item.player),
-                        locationName = names.locationName(item.location, item.player),
-                        isNew = index > lastReportedIndex,
-                    ),
+                val isNew = index > lastReportedIndex
+                ReceivedItem(
+                    index = index,
+                    item = item,
+                    itemName = names.itemName(item.item, ownSlot),
+                    senderName = names.playerName(item.player),
+                    locationName = names.locationName(item.location, item.player),
+                    isNew = isNew,
+                    receivedAtMillis = if (isNew) now else known.getOrNull(index)?.receivedAtMillis,
                 )
             }
+            _items.value = if (packet.index == 0) received else _items.value + received
+            received.forEach { _receivedItems.emit(it) }
             nextIndex = packet.index + packet.items.size
             if (nextIndex - 1 > lastReportedIndex) {
                 markReported(nextIndex - 1)

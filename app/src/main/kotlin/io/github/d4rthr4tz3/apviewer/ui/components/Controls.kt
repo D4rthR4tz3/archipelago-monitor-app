@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -77,6 +78,7 @@ fun ScreenHeader(
     title: String,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
+    subtitleColor: Color = ApColors.TextSecondary,
     navigation: (@Composable () -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
@@ -105,7 +107,7 @@ fun ScreenHeader(
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.labelSmall,
-                    color = ApColors.TextSecondary,
+                    color = subtitleColor,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -356,6 +358,8 @@ fun SwitchRow(
     description: String? = null,
     leading: (@Composable () -> Unit)? = null,
     inset: Boolean = true,
+    labelColor: Color = ApColors.TextPrimary,
+    labelWeight: FontWeight? = null,
 ) {
     Row(
         modifier = modifier
@@ -375,7 +379,8 @@ fun SwitchRow(
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelLarge,
-                color = ApColors.TextPrimary,
+                color = labelColor,
+                fontWeight = labelWeight,
             )
             if (description != null) {
                 Text(

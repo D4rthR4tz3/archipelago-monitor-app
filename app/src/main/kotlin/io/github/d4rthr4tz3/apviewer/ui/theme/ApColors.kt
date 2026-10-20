@@ -16,6 +16,9 @@ object ApColors {
 
     /** Only for problems, such as a refused connection. */
     val Error = Color(0xFFF07C7C)
+
+    /** Border of a card that reports a problem. */
+    val ErrorBorder = Color(0xFF3A2626)
 }
 
 /** Colors that make feed, hint and notification content readable. */
