@@ -6,7 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import io.github.d4rthr4tz3.apviewer.ui.MonitorApp
+import io.github.d4rthr4tz3.apviewer.ui.ApApp
 import io.github.d4rthr4tz3.apviewer.ui.theme.ApViewerTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,7 +19,7 @@ class MainActivity : ComponentActivity() {
         )
         setContent {
             ApViewerTheme {
-                MonitorApp()
+                ApApp()
             }
         }
     }
