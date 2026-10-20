@@ -54,13 +54,48 @@ class MultiworldSessionTest {
     private fun FakeSocket.connectPacket() = sentOf<ClientPacket.Connect>().single()
 
     @Test
-    fun `connects every slot and only the first one with text`() = runTest {
+    fun `connects every slot with text`() = runTest {
         val (link, zelda) = connect(session())
 
         assertEquals("Link", link.connectPacket().name)
         assertEquals(listOf(ConnectionTags.TRACKER), link.connectPacket().tags)
         assertEquals("Zelda", zelda.connectPacket().name)
-        assertTrue(ConnectionTags.NO_TEXT in zelda.connectPacket().tags)
+        assertEquals(listOf(ConnectionTags.TRACKER), zelda.connectPacket().tags)
+    }
+
+    @Test
+    fun `keeps room messages once and adds what only other slots receive`() = runTest {
+        val session = session()
+        val (link, zelda) = connect(session)
+        fun chat(text: String) = ServerPacket.PrintJson(
+            type = "Chat",
+            data = listOf(JsonMessagePart(text = text)),
+        )
+        fun hint(receiving: Int, finding: Int, text: String) = ServerPacket.PrintJson(
+            type = "Hint",
+            data = listOf(JsonMessagePart(text = text)),
+            receiving = receiving,
+            item = TestRoom.item(1, from = finding),
+        )
+        val answer = ServerPacket.PrintJson(
+            type = "CommandResult",
+            data = listOf(JsonMessagePart(text = "No hints found.")),
+        )
+
+        link.receive(chat("hello"), hint(receiving = 1, finding = 3, text = "both"))
+        zelda.receive(
+            chat("hello"),
+            hint(receiving = 1, finding = 3, text = "both"),
+            hint(receiving = 3, finding = 2, text = "zelda"),
+            answer,
+        )
+        runCurrent()
+
+        // The slots' connections run concurrently, so only the content is fixed, not the order.
+        assertEquals(
+            listOf("No hints found.", "both", "hello", "zelda"),
+            session.feed.value.map { it.message.plainText }.sorted(),
+        )
     }
 
     @Test

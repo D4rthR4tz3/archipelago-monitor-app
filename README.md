@@ -10,7 +10,7 @@ resolved and colored like in the Archipelago text client.
 What works so far:
 
 - Several multiworlds with several slots each, saved on the device. Every slot connects as a
-  tracker; only the first one receives the room's text.
+  tracker and receives text; room-wide messages appear once in the feed.
 - Overview with connection state, new items for your slots and the latest one.
 - Feed per multiworld with filters (all, for me, from me, chat, item types), classic or structured
   layout, stored history and a chat input that sends as one of your slots.
