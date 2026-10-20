@@ -54,7 +54,12 @@ class HintsViewModel(private val container: AppContainer, private val multiworld
     ) { profiles, status, hints, current ->
         val slotNames = profiles.multiworld(multiworldId)?.slots?.map { it.name }.orEmpty()
         val selected = current.slot?.takeIf { it in slotNames }
-        val sorted = hints.sortedWith(compareBy { it.hint.status.sortOrder })
+        // A fixed order within each status, so the list does not change between the two tabs.
+        val sorted = hints.sortedWith(
+            compareBy<MultiworldHint> { it.hint.status.sortOrder }
+                .thenBy(String.CASE_INSENSITIVE_ORDER) { it.hint.itemName }
+                .thenBy(String.CASE_INSENSITIVE_ORDER) { it.hint.locationName },
+        )
         HintsState(
             connected = status is MultiworldStatus.Connected,
             slotNames = slotNames,
