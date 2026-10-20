@@ -125,6 +125,14 @@ class SlotConnection(
         return true
     }
 
+    /**
+     * Closes the current connection without waiting for it to time out, for example when the
+     * network is gone. The slot then reconnects as after any other drop.
+     */
+    fun dropConnection() {
+        socket?.close()
+    }
+
     /** Sends [text] as chat message or command. Returns `false` if not connected. */
     fun say(text: String): Boolean {
         if (_state.value !is SlotState.Connected) return false
@@ -151,6 +159,8 @@ class SlotConnection(
                 _state.value = SlotState.Failed(outcome.reason)
                 return
             }
+            // Without a network there is nothing to wait out; the loop waits for the network.
+            if (!online.value) continue
             attempt = if (outcome.connected) 1 else attempt + 1
             val delayMillis = reconnectPolicy.delayMillis(attempt)
             // A request from before this wait must not cut it short.

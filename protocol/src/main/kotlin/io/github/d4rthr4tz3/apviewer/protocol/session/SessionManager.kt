@@ -97,8 +97,11 @@ class SessionManager(
      * Tells whether the device has a network. Without one, waiting slots show that and stop
      * retrying; once it is back, they connect right away.
      */
+    @Synchronized
     fun setOnline(value: Boolean) {
         _online.value = value
+        // Connections over the lost network are dead; closing them now shows it right away.
+        if (!value) running.values.forEach { it.session.dropConnections() }
         retryNow()
     }
 

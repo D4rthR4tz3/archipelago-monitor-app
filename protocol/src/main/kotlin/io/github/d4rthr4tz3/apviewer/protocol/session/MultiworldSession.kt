@@ -141,6 +141,11 @@ class MultiworldSession(
         stopCollectors()
     }
 
+    /** Closes the connections of all slots; they reconnect as after any other drop. */
+    fun dropConnections() {
+        slots.forEach { it.dropConnection() }
+    }
+
     /** Ends the wait of every slot that waits to reconnect. */
     fun retryNow() {
         slots.forEach { it.retryNow() }
