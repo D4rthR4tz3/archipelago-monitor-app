@@ -1,6 +1,6 @@
 package io.github.d4rthr4tz3.apviewer.ui.components
 
-import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
@@ -14,9 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import io.github.d4rthr4tz3.apviewer.R
 import io.github.d4rthr4tz3.apviewer.ui.theme.ApColors
 import kotlin.math.roundToInt
-import kotlinx.coroutines.launch
 
 /**
  * Swiping [content] from right to left reveals a delete action. Released beyond
@@ -44,10 +43,11 @@ fun SwipeToDelete(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
-    val offset = remember { Animatable(0f) }
+    // Plain state, changed synchronously while dragging: launching a coroutine per drag event let
+    // late drag updates cancel the animation back to 0 and leave the row half open.
+    var offset by remember { mutableFloatStateOf(0f) }
     var width by remember { mutableIntStateOf(0) }
-    val armed = width > 0 && -offset.value >= width * DELETE_THRESHOLD
+    val armed = width > 0 && -offset >= width * DELETE_THRESHOLD
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -61,7 +61,7 @@ fun SwipeToDelete(
                 )
             },
     ) {
-        if (offset.value < 0f) {
+        if (offset < 0f) {
             Row(
                 modifier = Modifier
                     .matchParentSize()
@@ -79,18 +79,23 @@ fun SwipeToDelete(
         }
         Box(
             modifier = Modifier
-                .offset { IntOffset(offset.value.roundToInt(), 0) }
+                .offset { IntOffset(offset.roundToInt(), 0) }
                 .background(ApColors.Background)
                 .draggable(
                     orientation = Orientation.Horizontal,
                     state = rememberDraggableState { delta ->
-                        scope.launch {
-                            offset.snapTo((offset.value + delta).coerceIn(-width.toFloat(), 0f))
-                        }
+                        offset = (offset + delta).coerceIn(-width.toFloat(), 0f)
                     },
                     onDragStopped = {
-                        if (width > 0 && -offset.value >= width * DELETE_THRESHOLD) onDelete()
-                        offset.animateTo(0f)
+                        if (width > 0 && -offset >= width * DELETE_THRESHOLD) onDelete()
+                        try {
+                            animate(initialValue = offset, targetValue = 0f) { value, _ ->
+                                offset = value
+                            }
+                        } finally {
+                            // The confirmation dialog can cancel the animation; never stay open.
+                            offset = 0f
+                        }
                     },
                 ),
         ) {
