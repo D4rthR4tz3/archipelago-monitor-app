@@ -2,6 +2,7 @@ name: Validate Branch Name
 
 on:
   push:
+    branches: ['**']
   pull_request:
 
 permissions:
