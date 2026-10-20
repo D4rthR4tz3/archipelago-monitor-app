@@ -6,6 +6,8 @@ import io.github.d4rthr4tz3.apviewer.protocol.message.FeedMessage
 import io.github.d4rthr4tz3.apviewer.protocol.message.MessageRenderer
 import io.github.d4rthr4tz3.apviewer.protocol.message.NameResolver
 import io.github.d4rthr4tz3.apviewer.protocol.model.GameData
+import io.github.d4rthr4tz3.apviewer.protocol.model.Hint
+import io.github.d4rthr4tz3.apviewer.protocol.model.HintStatus
 import io.github.d4rthr4tz3.apviewer.protocol.model.NetworkVersion
 import io.github.d4rthr4tz3.apviewer.protocol.monitor.FailureReason
 import io.github.d4rthr4tz3.apviewer.protocol.packet.ClientPacket
@@ -27,6 +29,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonElement
 
 /**
  * Connection of one slot as a tracker. It never sends checks. It reconnects with backoff after an
@@ -47,6 +50,7 @@ class SlotConnection(
     private val _messages = MutableSharedFlow<FeedMessage>()
     private val _receivedItems = MutableSharedFlow<ReceivedItem>()
     private val _lastReportedIndex = MutableStateFlow<Int?>(null)
+    private val _hints = MutableStateFlow<List<SlotHint>>(emptyList())
     private var job: Job? = null
 
     @Volatile private var session: Session? = null
@@ -68,6 +72,12 @@ class SlotConnection(
      */
     val lastReportedIndex: StateFlow<Int?> = _lastReportedIndex.asStateFlow()
 
+    /**
+     * Hints for and from this slot, as last read from the server. Kept while reconnecting and
+     * cleared by [stop].
+     */
+    val hints: StateFlow<List<SlotHint>> = _hints.asStateFlow()
+
     /** Connects, or reconnects if already started. */
     fun start() {
         job?.cancel()
@@ -82,6 +92,7 @@ class SlotConnection(
         job = null
         socket = null
         _state.value = SlotState.Idle
+        _hints.value = emptyList()
     }
 
     /**
@@ -92,6 +103,16 @@ class SlotConnection(
         val current = session?.takeIf { _state.value is SlotState.Connected } ?: return false
         scope.launch { current.markAllReported() }
         return true
+    }
+
+    /**
+     * Sets the [status] of the hint for [location] in the world of [findingSlot]. Only works for
+     * hints this slot receives. Returns `false` if not connected.
+     */
+    fun updateHint(findingSlot: Int, location: Long, status: HintStatus): Boolean {
+        if (_state.value !is SlotState.Connected) return false
+        val packet = ClientPacket.UpdateHint(findingSlot, location, status.value)
+        return socket?.send(listOf(packet)) ?: false
     }
 
     /** Sends [text] as chat message or command. Returns `false` if not connected. */
@@ -167,6 +188,7 @@ class SlotConnection(
         private var lastReportedIndex = -1
         private var nextIndex = 0
         private var refusal: FailureReason.Refused? = null
+        private var hintsKey: String? = null
 
         var connected = false
             private set
@@ -206,6 +228,12 @@ class SlotConnection(
                             _messages.emit(renderer.render(packet, names))
                         }
                     }
+
+                    is ServerPacket.Retrieved -> hintsKey?.let { key ->
+                        if (key in packet.keys) onHints(packet.keys[key])
+                    }
+
+                    is ServerPacket.SetReply -> if (packet.key == hintsKey) onHints(packet.value)
 
                     is ServerPacket.Unknown -> Unit
                 }
@@ -257,16 +285,19 @@ class SlotConnection(
                 .toSet() +
                 listOfNotNull(packet.slot.takeIf { config.slotName in config.ownSlotNames })
             renderer = MessageRenderer(ownSlots)
-            val key = SlotKey(serverKey(config.address), seedName, packet.team, packet.slot)
-            slotKey = key
-            val stored = itemIndexStore.lastReportedIndex(key)
+            val indexKey = SlotKey(serverKey(config.address), seedName, packet.team, packet.slot)
+            slotKey = indexKey
+            val stored = itemIndexStore.lastReportedIndex(indexKey)
             lastReportedIndex = stored ?: baselineIndex(frame)
             if (stored == null) {
-                itemIndexStore.setLastReportedIndex(key, lastReportedIndex)
+                itemIndexStore.setLastReportedIndex(indexKey, lastReportedIndex)
             }
             _lastReportedIndex.value = lastReportedIndex
             nextIndex = 0
             connected = true
+            val key = Hint.storageKey(packet.team, packet.slot)
+            hintsKey = key
+            socket.send(listOf(ClientPacket.Get(listOf(key)), ClientPacket.SetNotify(listOf(key))))
             _state.value = SlotState.Connected(
                 SlotInfo(
                     url = url,
@@ -281,6 +312,24 @@ class SlotConnection(
                         .map { RoomPlayer(it.slot, it.name, packet.slotInfo[it.slot]?.game) },
                 ),
             )
+        }
+
+        private fun onHints(value: JsonElement?) {
+            _hints.value = Hint.listFrom(value).map { hint ->
+                SlotHint(
+                    receivingSlot = hint.receivingPlayer,
+                    receiverName = names.playerName(hint.receivingPlayer),
+                    findingSlot = hint.findingPlayer,
+                    finderName = names.playerName(hint.findingPlayer),
+                    itemId = hint.item,
+                    itemName = names.itemName(hint.item, hint.receivingPlayer),
+                    itemFlags = hint.itemFlags,
+                    locationId = hint.location,
+                    locationName = names.locationName(hint.location, hint.findingPlayer),
+                    entrance = hint.entrance,
+                    status = hint.hintStatus,
+                )
+            }
         }
 
         /**
@@ -313,7 +362,6 @@ class SlotConnection(
                 )
             }
             nextIndex = packet.index + packet.items.size
-            val key = slotKey
             if (nextIndex - 1 > lastReportedIndex) {
                 markReported(nextIndex - 1)
             }
