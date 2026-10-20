@@ -10,6 +10,12 @@ Read and follow these before writing code or committing:
 - [Commit messages](docs/conventions/commit-messages.md): Conventional Commits, plain text without emoji.
 - [Attribution](docs/conventions/attribution.md): no co-authoring, no AI attribution lines.
 
+## Product
+
+- [Brief](docs/product/brief.md): scope and technical findings.
+- [Design](docs/product/design.md): design rules and tokens; layouts live on the linked canvas.
+- [Roadmap](docs/product/roadmap.md): build order.
+
 ## Project layout
 
 - `protocol/`: pure Kotlin/JVM module with the Archipelago network protocol (packet models,
