@@ -50,6 +50,8 @@ class PacketCodec {
         "RoomUpdate" -> ServerPacket.RoomUpdate.serializer()
         "DataPackage" -> ServerPacket.DataPackage.serializer()
         "PrintJSON" -> ServerPacket.PrintJson.serializer()
+        "Retrieved" -> ServerPacket.Retrieved.serializer()
+        "SetReply" -> ServerPacket.SetReply.serializer()
         else -> null
     }
 }

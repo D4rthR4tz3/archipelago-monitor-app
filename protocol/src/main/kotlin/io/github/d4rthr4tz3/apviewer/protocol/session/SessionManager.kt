@@ -1,6 +1,7 @@
 package io.github.d4rthr4tz3.apviewer.protocol.session
 
 import io.github.d4rthr4tz3.apviewer.protocol.client.PacketSocketFactory
+import io.github.d4rthr4tz3.apviewer.protocol.model.HintStatus
 import io.github.d4rthr4tz3.apviewer.protocol.monitor.FeedEntry
 import io.github.d4rthr4tz3.apviewer.protocol.store.DataPackageCache
 import io.github.d4rthr4tz3.apviewer.protocol.store.ItemIndexStore
@@ -91,6 +92,18 @@ class SessionManager(
     /** Sends [text] to the room of multiworld [id] as [slotName]. Returns `false` if not sent. */
     fun say(id: String, slotName: String, text: String): Boolean =
         _sessions.value[id]?.say(slotName, text) ?: false
+
+    /** Hints of the multiworld with [id]; empty while it is not running. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun hints(id: String): Flow<List<MultiworldHint>> = sessions
+        .map { it[id] }
+        .distinctUntilChanged()
+        .flatMapLatest { session -> session?.hints ?: flowOf(emptyList()) }
+        .distinctUntilChanged()
+
+    /** Sets the [status] of [hint] in multiworld [id]. Returns `false` if not sent. */
+    fun updateHint(id: String, hint: SlotHint, status: HintStatus): Boolean =
+        _sessions.value[id]?.updateHint(hint, status) ?: false
 
     /** Combined connection state of the multiworld with [id]. */
     @OptIn(ExperimentalCoroutinesApi::class)
