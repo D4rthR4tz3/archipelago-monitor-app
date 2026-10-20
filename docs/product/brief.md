@@ -35,7 +35,8 @@ my slots receives an item.
 - Android: foreground service (`foregroundServiceType="specialUse"`), `POST_NOTIFICATIONS` from
   Android 13, reconnect with backoff plus ping (paused without a network, immediate once it is back
   or the app returns), try `wss://` before `ws://`, support per-message
-  compression. Notification channels per item type (off / silent / sound).
+  compression. The mode per item type (off / silent / sound) is a slot setting, so notifications
+  use a channel with sound and one without, plus channels for hints, mentions and the status.
 - Stack: Kotlin, Jetpack Compose, OkHttp WebSocket, kotlinx.serialization, Room (feed, hints),
   DataStore (profiles). Alternative: Archipelago.MultiClient.Java.
 - Reference client: [mooinglemur/axolotl](https://github.com/mooinglemur/axolotl) (color logic,

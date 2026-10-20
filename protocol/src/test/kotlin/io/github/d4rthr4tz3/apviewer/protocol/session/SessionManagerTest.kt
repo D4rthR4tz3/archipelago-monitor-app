@@ -86,6 +86,19 @@ class SessionManagerTest {
     }
 
     @Test
+    fun `in the background keeps only multiworlds kept in the background`() = runTest {
+        val manager = manager()
+        val local = zelda.copy(id = "local", keepInBackground = false)
+        manager.update(Profiles(multiworlds = listOf(zelda, local)))
+
+        manager.setForeground(false)
+        assertEquals(setOf("zelda"), manager.sessions.value.keys)
+
+        manager.setForeground(true)
+        assertEquals(setOf("zelda", "local"), manager.sessions.value.keys)
+    }
+
+    @Test
     fun `connects only multiworlds that connect on start`() = runTest {
         val manager = manager()
 

@@ -197,4 +197,41 @@
     <string name="settings_layout_classic">Classic</string>
     <string name="settings_layout_structured">Structured</string>
     <string name="settings_feed_layout_hint">Classic shows one line per message like the Archipelago text client, structured shows the item first.</string>
+
+    <string name="action_pause">Pause</string>
+    <string name="channel_status">Connection status</string>
+    <string name="channel_items">Items with sound</string>
+    <string name="channel_items_silent">Items without sound</string>
+    <string name="channel_hints">New hints</string>
+    <string name="channel_mentions">Chat mentions</string>
+    <plurals name="multiworld_count">
+        <item quantity="one">%d multiworld</item>
+        <item quantity="other">%d multiworlds</item>
+    </plurals>
+    <string name="notify_status_connected">%1$s in %2$s connected</string>
+    <string name="notify_status_connecting">%s connecting</string>
+    <string name="notify_status_reconnecting">%s reconnecting</string>
+    <string name="notify_status_offline">%s waiting for a network</string>
+    <string name="notify_status_failed">%s cannot connect</string>
+    <string name="notify_item_to">to %1$s from %2$s</string>
+    <string name="notify_hint_for">for %s</string>
+    <string name="notify_hint_at">at %1$s, %2$s</string>
+    <string name="notify_mention">Chat mentions %s</string>
+    <string name="notify_show_feed">Show in feed</string>
+    <plurals name="notify_items">
+        <item quantity="one">%d new item</item>
+        <item quantity="other">%d new items</item>
+    </plurals>
+    <plurals name="notify_hints">
+        <item quantity="one">New hint</item>
+        <item quantity="other">%d new hints</item>
+    </plurals>
+    <plurals name="notify_mentions">
+        <item quantity="one">%d chat mention</item>
+        <item quantity="other">%d chat mentions</item>
+    </plurals>
+    <plurals name="notify_more">
+        <item quantity="one">%d more</item>
+        <item quantity="other">%d more</item>
+    </plurals>
 </resources>
