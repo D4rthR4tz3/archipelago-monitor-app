@@ -10,9 +10,10 @@ import io.github.d4rthr4tz3.apviewer.ui.feed.FeedScreen
 
 /** Root composable: shows the connect form until a slot is connected, then its feed. */
 @Composable
-fun MonitorApp(viewModel: MonitorViewModel = viewModel()) {
+fun MonitorApp(viewModel: MonitorViewModel = viewModel(factory = MonitorViewModel.Factory)) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val feed by viewModel.feed.collectAsStateWithLifecycle()
+    val lastConnection by viewModel.lastConnection.collectAsStateWithLifecycle()
 
     when (val current = state) {
         is MonitorState.Connected -> FeedScreen(
@@ -21,6 +22,10 @@ fun MonitorApp(viewModel: MonitorViewModel = viewModel()) {
             onDisconnect = viewModel::disconnect,
         )
 
-        else -> ConnectScreen(state = current, onConnect = viewModel::connect)
+        else -> ConnectScreen(
+            state = current,
+            initial = lastConnection,
+            onConnect = viewModel::connect,
+        )
     }
 }
