@@ -71,7 +71,9 @@ fun ClassicFeedRow(entry: FeedEntry, modifier: Modifier = Modifier) {
     )
 }
 
-/** Item first, then sender, receiver and location; hints alike; other messages as text. */
+/**
+ * Item first, then sender and receiver, then the location; hints alike; other messages as text.
+ */
 @Composable
 fun StructuredFeedRow(entry: FeedEntry, modifier: Modifier = Modifier) {
     val message = entry.message
@@ -112,16 +114,13 @@ fun StructuredFeedRow(entry: FeedEntry, modifier: Modifier = Modifier) {
                                 append(at)
                                 appendSegment(it)
                             }
-                            hint.location?.let {
-                                append(", ")
-                                appendSegment(it)
-                            }
                             hint.status?.let {
                                 append(' ')
                                 appendSegment(it)
                             }
                         },
                     )
+                    hint.location?.let { LocationLine(it) }
                 }
 
                 parts != null -> {
@@ -134,12 +133,9 @@ fun StructuredFeedRow(entry: FeedEntry, modifier: Modifier = Modifier) {
                             appendSegment(parts.sender)
                             append(to)
                             if (receiver != null) appendSegment(receiver) else append(themselves)
-                            parts.location?.let {
-                                append(", ")
-                                appendSegment(it)
-                            }
                         },
                     )
+                    parts.location?.let { LocationLine(it) }
                 }
 
                 else -> Text(
@@ -160,6 +156,12 @@ private fun ItemHeadline(item: MessageSegment) {
         color = style.color,
         fontWeight = style.weight,
     )
+}
+
+/** The location on a line of its own, as location names are often long. */
+@Composable
+private fun LocationLine(location: MessageSegment) {
+    DetailLine(buildAnnotatedString { appendSegment(location) })
 }
 
 @Composable
