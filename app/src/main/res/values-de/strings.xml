@@ -57,6 +57,7 @@
     <string name="overview_empty_text">Füge eine Multiworld mit Serveradresse und deinen Slotnamen hinzu. Die App verbindet sich als Tracker und stört deinen Spielclient nicht.</string>
     <string name="overview_empty_add">Multiworld hinzufügen</string>
     <string name="overview_add">Multiworld</string>
+    <string name="overview_no_slots">Keine Slots hinterlegt</string>
     <string name="overview_latest_item">%1$s %2$s an %3$s</string>
     <plurals name="overview_unread">
         <item quantity="one">%d neu</item>
@@ -74,6 +75,7 @@
     <string name="feed_connecting_hint">Nachrichten erscheinen, sobald die Verbindung steht.</string>
     <string name="feed_to">" an "</string>
     <string name="feed_themselves">sich selbst</string>
+    <string name="feed_hint">Hint</string>
     <string name="feed_hint_for">"Hint für "</string>
     <string name="feed_hint_at">" bei "</string>
     <string name="filter_all">Alle</string>
@@ -84,7 +86,6 @@
     <string name="hints_receive">Für mich</string>
     <string name="hints_find">Zu finden</string>
     <string name="hints_all_slots">Alle meine Slots</string>
-    <string name="hints_hide_found">Gefundene ausblenden</string>
     <string name="hints_item">Item</string>
     <string name="hints_receiver">Empfänger</string>
     <string name="hints_finder">Finder</string>

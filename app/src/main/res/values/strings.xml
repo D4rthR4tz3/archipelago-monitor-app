@@ -59,6 +59,7 @@
     <string name="overview_empty_text">Add a multiworld with the server address and your slot names. The app connects as a tracker and does not disturb your game client.</string>
     <string name="overview_empty_add">Add multiworld</string>
     <string name="overview_add">Multiworld</string>
+    <string name="overview_no_slots">No slots added</string>
     <string name="overview_latest_item">%1$s %2$s to %3$s</string>
     <plurals name="overview_unread">
         <item quantity="one">%d new</item>
@@ -76,6 +77,7 @@
     <string name="feed_connecting_hint">Messages appear once the connection is up.</string>
     <string name="feed_to">" to "</string>
     <string name="feed_themselves">themselves</string>
+    <string name="feed_hint">Hint</string>
     <string name="feed_hint_for">"Hint for "</string>
     <string name="feed_hint_at">" at "</string>
     <string name="filter_all">All</string>
@@ -86,7 +88,6 @@
     <string name="hints_receive">For me</string>
     <string name="hints_find">To find</string>
     <string name="hints_all_slots">All my slots</string>
-    <string name="hints_hide_found">Hide found</string>
     <string name="hints_item">Item</string>
     <string name="hints_receiver">Receiver</string>
     <string name="hints_finder">Finder</string>

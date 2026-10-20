@@ -52,6 +52,7 @@ import io.github.d4rthr4tz3.apviewer.ui.components.ApSwitch
 import io.github.d4rthr4tz3.apviewer.ui.components.PrimaryButton
 import io.github.d4rthr4tz3.apviewer.ui.components.ScreenHeader
 import io.github.d4rthr4tz3.apviewer.ui.components.SectionTitle
+import io.github.d4rthr4tz3.apviewer.ui.components.SwipeToDelete
 import io.github.d4rthr4tz3.apviewer.ui.containerViewModel
 import io.github.d4rthr4tz3.apviewer.ui.formatClock
 import io.github.d4rthr4tz3.apviewer.ui.multiworld.ConfirmDialog
@@ -74,6 +75,7 @@ fun OverviewRoute(
         onOpenFeed = onOpenFeed,
         onAddMultiworld = onAddMultiworld,
         onOpenSettings = onOpenSettings,
+        onRemove = viewModel::remove,
     )
 }
 
@@ -85,9 +87,11 @@ fun OverviewScreen(
     onOpenFeed: (String) -> Unit,
     onAddMultiworld: () -> Unit,
     onOpenSettings: () -> Unit,
+    onRemove: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val empty = state.loaded && state.rows.isEmpty()
+    var removing by rememberSaveable { mutableStateOf<String?>(null) }
     Box(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             ScreenHeader(
@@ -111,7 +115,12 @@ fun OverviewScreen(
                 LazyColumn(contentPadding = PaddingValues(bottom = 104.dp)) {
                     items(state.rows, key = { it.id }) { row ->
                         HorizontalDivider(color = ApColors.Divider)
-                        MultiworldListItem(row = row, onClick = { onOpenFeed(row.id) })
+                        SwipeToDelete(
+                            deleteLabel = stringResource(R.string.action_remove),
+                            onDelete = { removing = row.id },
+                        ) {
+                            MultiworldListItem(row = row, onClick = { onOpenFeed(row.id) })
+                        }
                     }
                     item { HorizontalDivider(color = ApColors.Divider) }
                 }
@@ -128,6 +137,19 @@ fun OverviewScreen(
                     .height(56.dp),
             )
         }
+    }
+    val removingRow = state.rows.firstOrNull { it.id == removing }
+    if (removingRow != null) {
+        ConfirmDialog(
+            title = stringResource(R.string.edit_remove_title, removingRow.name),
+            text = stringResource(R.string.edit_remove_text),
+            confirm = stringResource(R.string.action_remove),
+            onConfirm = {
+                removing = null
+                onRemove(removingRow.id)
+            },
+            onDismiss = { removing = null },
+        )
     }
 }
 
@@ -285,8 +307,14 @@ private fun MultiworldSummary(
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            // Without slots nothing connects, so say so instead of leaving the line blank.
+            val noSlots = row.slotNames.isEmpty()
             Text(
-                text = row.slotNames.joinToString(),
+                text = if (noSlots) {
+                    stringResource(R.string.overview_no_slots)
+                } else {
+                    row.slotNames.joinToString()
+                },
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.bodySmall,
                 color = if (disconnected) ApColors.TextTertiary else ApColors.TextSecondary,
@@ -365,6 +393,14 @@ private fun OverviewScreenPreview() {
                         null,
                     ),
                     MultiworldRow(
+                        "4",
+                        "Neue Runde",
+                        emptyList(),
+                        MultiworldStatus.Disconnected,
+                        0,
+                        null,
+                    ),
+                    MultiworldRow(
                         "3",
                         "Metroid-Weekly",
                         listOf("Sven_SM"),
@@ -381,6 +417,7 @@ private fun OverviewScreenPreview() {
             onOpenFeed = {},
             onAddMultiworld = {},
             onOpenSettings = {},
+            onRemove = {},
         )
     }
 }
