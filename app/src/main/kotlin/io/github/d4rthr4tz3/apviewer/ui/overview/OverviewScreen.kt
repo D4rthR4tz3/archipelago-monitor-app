@@ -15,12 +15,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -48,6 +54,7 @@ import io.github.d4rthr4tz3.apviewer.ui.components.ScreenHeader
 import io.github.d4rthr4tz3.apviewer.ui.components.SectionTitle
 import io.github.d4rthr4tz3.apviewer.ui.containerViewModel
 import io.github.d4rthr4tz3.apviewer.ui.formatClock
+import io.github.d4rthr4tz3.apviewer.ui.multiworld.ConfirmDialog
 import io.github.d4rthr4tz3.apviewer.ui.statusDetail
 import io.github.d4rthr4tz3.apviewer.ui.statusLabel
 import io.github.d4rthr4tz3.apviewer.ui.theme.ApColors
@@ -156,6 +163,23 @@ private fun EmptyOverview(onAddMultiworld: () -> Unit, modifier: Modifier = Modi
 
 @Composable
 private fun ConnectionsCard(state: OverviewState, onCheckedChange: (Boolean) -> Unit) {
+    // The card sits at the top of the screen, so turning everything off asks first.
+    var confirmOff by rememberSaveable { mutableStateOf(false) }
+    val onChange = { enabled: Boolean ->
+        if (enabled) onCheckedChange(true) else confirmOff = true
+    }
+    if (confirmOff) {
+        ConfirmDialog(
+            title = stringResource(R.string.overview_disable_title),
+            text = stringResource(R.string.overview_disable_text),
+            confirm = stringResource(R.string.overview_disable_confirm),
+            onConfirm = {
+                confirmOff = false
+                onCheckedChange(false)
+            },
+            onDismiss = { confirmOff = false },
+        )
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -164,7 +188,7 @@ private fun ConnectionsCard(state: OverviewState, onCheckedChange: (Boolean) -> 
             .toggleable(
                 value = state.connectionsEnabled,
                 role = Role.Switch,
-                onValueChange = onCheckedChange,
+                onValueChange = onChange,
             )
             .padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -185,7 +209,7 @@ private fun ConnectionsCard(state: OverviewState, onCheckedChange: (Boolean) -> 
                 color = ApColors.TextSecondary,
             )
         }
-        ApSwitch(checked = state.connectionsEnabled, onCheckedChange = onCheckedChange)
+        ApSwitch(checked = state.connectionsEnabled, onCheckedChange = onChange)
     }
 }
 
@@ -201,13 +225,38 @@ private fun MultiworldListItem(row: MultiworldRow, onClick: () -> Unit) {
     val detail = statusDetail(row.status) ?: row.latestForMe
         ?.takeUnless { disconnected }
         ?.let { latestItemText(it) }
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+            .padding(start = 20.dp, end = 12.dp, top = 16.dp, bottom = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
+        MultiworldSummary(
+            row = row,
+            disconnected = disconnected,
+            statusColor = statusColor,
+            detail = detail,
+            modifier = Modifier.weight(1f),
+        )
+        Icon(
+            painter = painterResource(R.drawable.ic_chevron_right),
+            contentDescription = null,
+            tint = ApColors.TextTertiary,
+        )
+    }
+}
+
+@Composable
+private fun MultiworldSummary(
+    row: MultiworldRow,
+    disconnected: Boolean,
+    statusColor: Color,
+    detail: String?,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(
                 text = row.name,
