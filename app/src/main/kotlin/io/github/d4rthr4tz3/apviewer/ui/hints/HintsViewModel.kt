@@ -30,7 +30,6 @@ data class HintsState(
     val direction: HintDirection = HintDirection.RECEIVE,
     /** Slot to show, or `null` for all of the user's slots. */
     val slot: String? = null,
-    val hideFound: Boolean = false,
     val sortColumn: HintColumn = HintColumn.STATUS,
 )
 
@@ -39,12 +38,9 @@ class HintsViewModel(private val container: AppContainer, private val multiworld
     ViewModel() {
     private val direction = MutableStateFlow(HintDirection.RECEIVE)
     private val slot = MutableStateFlow<String?>(null)
-    private val hideFound = MutableStateFlow(false)
     private val sortColumn = MutableStateFlow(HintColumn.STATUS)
 
-    private val options = combine(direction, slot, hideFound, sortColumn) { dir, sel, hide, sort ->
-        Options(dir, sel, hide, sort)
-    }
+    private val options = combine(direction, slot, sortColumn, ::Options)
 
     val state: StateFlow<HintsState> = combine(
         container.profiles.profiles,
@@ -63,14 +59,13 @@ class HintsViewModel(private val container: AppContainer, private val multiworld
         HintsState(
             connected = status is MultiworldStatus.Connected,
             slotNames = slotNames,
-            visible = sorted.filter { it.matches(current.direction, selected, current.hideFound) },
+            visible = sorted.filter { it.matches(current.direction, selected) },
             table = hints.sortedWith(comparatorFor(current.sortColumn)),
             priorityCount = hints.count {
                 it.receiverIsOwn && it.hint.status == HintStatus.PRIORITY
             },
             direction = current.direction,
             slot = selected,
-            hideFound = current.hideFound,
             sortColumn = current.sortColumn,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), HintsState())
@@ -83,10 +78,6 @@ class HintsViewModel(private val container: AppContainer, private val multiworld
         slot.value = value
     }
 
-    fun setHideFound(value: Boolean) {
-        hideFound.value = value
-    }
-
     fun setSortColumn(value: HintColumn) {
         sortColumn.value = value
     }
@@ -94,7 +85,6 @@ class HintsViewModel(private val container: AppContainer, private val multiworld
     private data class Options(
         val direction: HintDirection,
         val slot: String?,
-        val hideFound: Boolean,
         val sortColumn: HintColumn,
     )
 
@@ -113,16 +103,12 @@ val HintStatus.sortOrder: Int
         HintStatus.FOUND -> 4
     }
 
-private fun MultiworldHint.matches(
-    direction: HintDirection,
-    slot: String?,
-    hideFound: Boolean,
-): Boolean {
+private fun MultiworldHint.matches(direction: HintDirection, slot: String?): Boolean {
     val (own, name) = when (direction) {
         HintDirection.RECEIVE -> receiverIsOwn to hint.receiverName
         HintDirection.FIND -> finderIsOwn to hint.finderName
     }
-    return own && (slot == null || name == slot) && !(hideFound && hint.status == HintStatus.FOUND)
+    return own && (slot == null || name == slot)
 }
 
 /** Sorts by [column] ascending; empty entrances go last. */
