@@ -22,7 +22,9 @@ my slots receives an item.
   `Connected`/`ConnectionRefused`, then `ReceivedItems`.
 - One connection per slot with tag `Tracker` (or `TextOnly`) and an empty game: no game validation,
   runs in parallel to the real game client.
-- Only one connection per multiworld receives text; all others add the tag `NoText`.
+- Every connection receives text. The server sends hint messages and command answers (for example
+  to `!hint`) only to the slots concerned and drops them for `NoText` connections, so `NoText`
+  would lose them. Room-wide messages are kept from the first connected slot only.
 - No notification spam: store the last item index per (server, seed, slot) and only report higher
   indices.
 - IDs to names via the data package; the game of each player comes from `slot_info`. Cache the data
