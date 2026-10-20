@@ -66,7 +66,7 @@ rules and tokens that apply everywhere.
 
 - Item for one of my slots: background `rgba(240, 106, 232, 0.12)`.
 - Item sent by one of my slots: no background.
-- Hint: background `rgba(232, 195, 90, 0.12)`.
+- Hint: no background; an info icon below the time, centered on the hint and location lines.
 - Received items are numbered from 1 in the Items tab.
 - Rows: 6 px × 8 px padding, 6 px radius, 4 px gap.
 

@@ -41,7 +41,4 @@ object ContentColors {
 
     /** Feed row background for items sent to one of the user's slots. */
     val HighlightForMe = Color(0x1FF06AE8)
-
-    /** Feed row background for hints. */
-    val HighlightHint = Color(0x1FE8C35A)
 }
