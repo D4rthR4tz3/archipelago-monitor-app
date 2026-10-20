@@ -71,7 +71,7 @@ This page records the design rules and tokens that apply to every screen.
 
 | Artboard      | Content                                                                          |
 | ------------- | -------------------------------------------------------------------------------- |
-| Main          | Multiworld overview: background switch with slot count, list of multiworlds with name, slots, status text, last item; button "Multiworld" |
+| Main          | Multiworld overview: background switch with slot count, list of multiworlds with name, slots ("no slots added" in gray when empty), status text, last item; swipe a row left to delete it (red past 40 % of the width, then a confirmation); button "Multiworld" |
 | Feed          | Text client: header with multiworld and status, tabs Feed / Hints, filter segments (All, For me, By me, Chat) and item type filter button, log in structured (default) or classic (monospace one line) layout, input with "send as" slot and message field |
 | Hints         | Direction segments (For me, To find), slot dropdown, list with item, status (read-only, as set when the hint was created), receiver, finder, location, entrance |
 | HintsWide     | Landscape table with sortable columns item, receiver, location, finder, entrance, status |

@@ -14,7 +14,6 @@ Read and follow these before writing code or committing:
 
 - [Brief](docs/product/brief.md): scope and technical findings.
 - [Design](docs/product/design.md): design rules and tokens.
-- [Roadmap](docs/product/roadmap.md): build order.
 
 ## Project layout
 
