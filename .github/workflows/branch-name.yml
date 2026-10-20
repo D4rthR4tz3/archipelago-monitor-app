@@ -2,6 +2,7 @@ name: Validate Branch Name
 
 on:
   push:
+    branches: ['**']
   pull_request:
 
 permissions:
@@ -25,8 +26,8 @@ jobs:
           branch = os.environ["BRANCH_NAME"]
 
           pattern = (
-              r"^(?:main|master|develop|"
-              r"(?:feat|fix|hotfix|release|chore|/)"
+              r"^(?:main|"
+              r"(?:feat|fix|hotfix|release|chore)/"
               r"[a-z0-9]+(?:\.[a-z0-9]+)*"
               r"(?:-[a-z0-9]+(?:\.[a-z0-9]+)*)*)$"
           )
@@ -37,8 +38,9 @@ jobs:
 
           print(f"::error::Invalid branch name: {branch}")
           print(
-              "Expected Conventional Branch 1.1.0 naming, "
-              "e.g. feature/add-login-page or fix/header-bug."
+              "Expected <type>/<description> with type feat, fix, hotfix, release "
+              "or chore, e.g. feat/add-login-page or fix/header-bug. "
+              "See docs/conventions/branch-names.md."
           )
           sys.exit(1)
           PY

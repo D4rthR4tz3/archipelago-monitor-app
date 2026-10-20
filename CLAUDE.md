@@ -10,6 +10,8 @@ Read and follow these before writing code or committing:
 
 - [Kotlin code style](docs/conventions/kotlin-style.md): Google's Android Kotlin style guide.
 - [Commit messages](docs/conventions/commit-messages.md): Conventional Commits, plain text without emoji.
+- [Branch names](docs/conventions/branch-names.md): Conventional Branch (`feat/`, `fix/`, `chore/`, …),
+  no AI agent prefixes.
 - [Attribution](docs/conventions/attribution.md): no co-authoring, no AI attribution lines.
 
 ## Product
