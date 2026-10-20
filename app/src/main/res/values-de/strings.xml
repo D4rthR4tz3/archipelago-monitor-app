@@ -85,7 +85,6 @@
     <string name="hints_receive">Für mich</string>
     <string name="hints_find">Zu finden</string>
     <string name="hints_all_slots">Alle meine Slots</string>
-    <string name="hints_hide_found">Gefundene ausblenden</string>
     <string name="hints_item">Item</string>
     <string name="hints_receiver">Empfänger</string>
     <string name="hints_finder">Finder</string>

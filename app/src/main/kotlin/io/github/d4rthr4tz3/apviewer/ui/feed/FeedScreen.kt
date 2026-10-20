@@ -122,7 +122,6 @@ fun FeedRoute(multiworldId: String, onBack: () -> Unit, onEdit: () -> Unit) {
                 state = hints,
                 onDirectionChange = hintsViewModel::setDirection,
                 onSlotChange = hintsViewModel::setSlot,
-                onHideFoundChange = hintsViewModel::setHideFound,
                 modifier = modifier,
             )
         },
