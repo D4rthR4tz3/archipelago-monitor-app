@@ -56,7 +56,7 @@ class MessageRendererTest {
             ),
         )
 
-        val message = MessageRenderer(ownSlot = 1).render(packet, names)
+        val message = MessageRenderer(ownSlots = setOf(1)).render(packet, names)
 
         assertEquals("Samus sent Hookshot to Link (Morph Ball (Brinstar))", message.plainText)
         assertEquals(SegmentKind.PLAYER, message.segments[0].kind)
@@ -76,7 +76,7 @@ class MessageRendererTest {
             ),
         )
 
-        val message = MessageRenderer(ownSlot = null).render(packet, names)
+        val message = MessageRenderer(ownSlots = emptySet()).render(packet, names)
 
         assertEquals("Player 9: Item 99", message.plainText)
     }

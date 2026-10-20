@@ -54,7 +54,7 @@ class OkHttpPacketSocketTest {
         val url = server.url("/").toString().replaceFirst("http", "ws")
 
         val socket = OkHttpPacketSocket.Factory(httpClient).open(url)
-        val packet = withTimeout(TIMEOUT_MILLIS) { socket.incoming.first() }
+        val packet = withTimeout(TIMEOUT_MILLIS) { socket.incoming.first().single() }
         socket.send(listOf(ClientPacket.Sync))
 
         assertEquals("hi", assertIs<ServerPacket.PrintJson>(packet).data.single().text)
