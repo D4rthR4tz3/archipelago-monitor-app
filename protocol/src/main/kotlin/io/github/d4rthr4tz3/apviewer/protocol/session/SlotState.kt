@@ -52,7 +52,8 @@ sealed interface SlotState {
 
 /**
  * An item the slot received. [index] is its position in the slot's item list. [isNew] is `true` if
- * the item was not reported before, which is when a notification is due.
+ * the item was not reported before, which is when a notification is due. [receivedAtMillis] is when
+ * a new item arrived; the server does not say when older items were received.
  */
 data class ReceivedItem(
     val index: Int,
@@ -61,4 +62,5 @@ data class ReceivedItem(
     val senderName: String,
     val locationName: String,
     val isNew: Boolean,
+    val receivedAtMillis: Long? = null,
 )

@@ -63,6 +63,8 @@ data class SavedSlot(
     /** Whether items for and from this slot are highlighted in the feed. */
     val highlight: Boolean = true,
     val notifications: SlotNotifications = SlotNotifications(),
+    /** Index of the newest received item the user has seen in the Items tab, `-1` if none. */
+    val lastSeenItemIndex: Int = -1,
 )
 
 /**
