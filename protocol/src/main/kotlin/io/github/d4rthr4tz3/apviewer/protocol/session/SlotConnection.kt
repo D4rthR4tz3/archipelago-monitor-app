@@ -7,7 +7,6 @@ import io.github.d4rthr4tz3.apviewer.protocol.message.MessageRenderer
 import io.github.d4rthr4tz3.apviewer.protocol.message.NameResolver
 import io.github.d4rthr4tz3.apviewer.protocol.model.GameData
 import io.github.d4rthr4tz3.apviewer.protocol.model.Hint
-import io.github.d4rthr4tz3.apviewer.protocol.model.NetworkVersion
 import io.github.d4rthr4tz3.apviewer.protocol.monitor.FailureReason
 import io.github.d4rthr4tz3.apviewer.protocol.packet.ClientPacket
 import io.github.d4rthr4tz3.apviewer.protocol.packet.ConnectionTags
@@ -43,7 +42,6 @@ class SlotConnection(
     private val itemIndexStore: ItemIndexStore,
     private val dataPackageCache: DataPackageCache,
     private val reconnectPolicy: ReconnectPolicy = ReconnectPolicy(),
-    private val clientVersion: NetworkVersion = DEFAULT_CLIENT_VERSION,
     private val uuid: String = UUID.randomUUID().toString(),
     private val clock: () -> Long = System::currentTimeMillis,
 ) {
@@ -270,7 +268,9 @@ class SlotConnection(
                         name = config.slotName,
                         password = config.password,
                         uuid = uuid,
-                        version = clientVersion,
+                        // Reporting the server's own version passes even a room that demands an
+                        // exact version match; trackers have no game that needs a newer client.
+                        version = packet.version,
                         itemsHandling = ItemsHandling.ALL,
                         tags = buildList {
                             add(ConnectionTags.TRACKER)
@@ -398,9 +398,6 @@ class SlotConnection(
     companion object {
         /** Default port of Archipelago servers. */
         const val DEFAULT_PORT = 38281
-
-        /** Version reported to the server; trackers without a game skip version checks. */
-        val DEFAULT_CLIENT_VERSION = NetworkVersion(major = 0, minor = 6, build = 0)
 
         /**
          * Returns the WebSocket URLs to try for [address]: the address itself if it has a scheme,
