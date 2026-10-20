@@ -108,9 +108,9 @@ fun StructuredFeedRow(entry: FeedEntry, modifier: Modifier = Modifier) {
                     painter = painterResource(R.drawable.ic_info),
                     contentDescription = stringResource(R.string.feed_hint),
                     modifier = Modifier
-                        .padding(top = if (hint.location != null) 12.dp else 3.dp)
-                        .size(14.dp),
-                    tint = ApColors.TextTertiary,
+                        .padding(top = if (hint.location != null) 9.dp else 0.dp)
+                        .size(20.dp),
+                    tint = ApColors.TextSecondary,
                 )
             }
         }
