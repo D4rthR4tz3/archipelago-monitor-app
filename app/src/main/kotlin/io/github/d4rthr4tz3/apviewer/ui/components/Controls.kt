@@ -39,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -317,11 +318,22 @@ fun PlainButton(
 
 /** Switch drawn like the design: light track when on, gray when off, no thumb icon. */
 @Composable
-fun ApSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier: Modifier = Modifier) {
+fun ApSwitch(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
     Box(
         modifier = modifier
             .size(width = 60.dp, height = 48.dp)
-            .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange),
+            .alpha(if (enabled) 1f else DISABLED_ALPHA)
+            .toggleable(
+                value = checked,
+                enabled = enabled,
+                role = Role.Switch,
+                onValueChange = onCheckedChange,
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Box(
@@ -448,3 +460,6 @@ fun RadioDot(selected: Boolean, modifier: Modifier = Modifier) {
 }
 
 private val RadioOff = Color(0xFF5A5A5A)
+
+/** Opacity of controls that cannot be used right now. */
+const val DISABLED_ALPHA = 0.38f
