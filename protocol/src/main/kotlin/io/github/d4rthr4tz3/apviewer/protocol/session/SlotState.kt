@@ -14,7 +14,10 @@ data class SlotConnectionConfig(
     val ownSlotNames: Set<String> = setOf(slotName),
 )
 
-/** Information about a connected slot. */
+/** A slot of the room, as reported by the server. */
+data class RoomPlayer(val slot: Int, val name: String, val game: String?)
+
+/** Information about a connected slot. [players] are all slots of the slot's team. */
 data class SlotInfo(
     val url: String,
     val seedName: String,
@@ -23,6 +26,7 @@ data class SlotInfo(
     val slot: Int,
     val playerName: String,
     val game: String?,
+    val players: List<RoomPlayer> = emptyList(),
 )
 
 /** Connection state of a [SlotConnection]. */

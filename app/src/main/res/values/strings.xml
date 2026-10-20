@@ -1,14 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">AP Viewer</string>
+    <string name="app_name" translatable="false">AP Monitor</string>
 
-    <string name="connect_title">Connect to a room</string>
-    <string name="connect_address">Server address</string>
-    <string name="connect_address_hint" translatable="false">archipelago.gg:38281</string>
-    <string name="connect_slot_name">Slot name</string>
-    <string name="connect_password">Password (optional)</string>
-    <string name="connect_button">Connect</string>
-    <string name="connect_connecting">Connecting to %1$s…</string>
+    <string name="action_add">Add</string>
+    <string name="action_back">Back</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_close">Close</string>
+    <string name="action_connect">Connect</string>
+    <string name="action_disconnect">Disconnect</string>
+    <string name="action_remove">Remove</string>
+    <string name="action_save">Save</string>
+
+    <string name="status_disconnected">Disconnected</string>
+    <string name="status_connecting">Connecting</string>
+    <string name="status_connected">Connected</string>
+    <string name="status_reconnecting">Reconnecting</string>
+    <string name="status_failed">Error</string>
+    <string name="status_reconnecting_detail">Connection lost at %1$s, attempt %2$d</string>
+    <string name="status_failed_detail">%1$s: %2$s</string>
+    <string name="status_with_slots">%1$s, %2$s</string>
+    <plurals name="slot_count">
+        <item quantity="one">%d slot</item>
+        <item quantity="other">%d slots</item>
+    </plurals>
 
     <string name="error_unreachable">Server not reachable.</string>
     <string name="error_unreachable_detail">Server not reachable: %1$s</string>
@@ -19,7 +33,115 @@
     <string name="error_invalid_password">wrong password</string>
     <string name="error_incompatible_version">incompatible version</string>
 
-    <string name="feed_seed">Seed %1$s · server %2$s</string>
+    <string name="overview_settings">App settings</string>
+    <string name="overview_connections">Connections active</string>
+    <string name="overview_active_slots">%1$d of %2$d slots active</string>
+    <string name="overview_multiworlds">Multiworlds</string>
+    <string name="overview_empty">No multiworld yet. Add one to start watching a room.</string>
+    <string name="overview_add">Multiworld</string>
+    <string name="overview_latest_item">%1$s %2$s to %3$s</string>
+    <plurals name="overview_unread">
+        <item quantity="one">%d new</item>
+        <item quantity="other">%d new</item>
+    </plurals>
+
+    <string name="tab_feed">Feed</string>
+    <string name="tab_hints">Hints</string>
+    <string name="feed_multiworld_settings">Multiworld settings</string>
     <string name="feed_empty">No messages yet.</string>
-    <string name="feed_disconnect">Disconnect</string>
+    <string name="feed_to">" to "</string>
+    <string name="feed_themselves">themselves</string>
+    <string name="filter_all">All</string>
+    <string name="filter_for_me">For me</string>
+    <string name="filter_from_me">From me</string>
+    <string name="filter_chat">Chat</string>
+    <string name="filter_item_types">Filter by item type</string>
+    <string name="hints_coming">Hints follow in the next step.</string>
+    <string name="say_placeholder">Message or !hint</string>
+    <string name="say_send">Send</string>
+    <string name="say_as">Send as %1$s</string>
+    <string name="say_unavailable">Not connected.</string>
+
+    <string name="item_class_progression">Progression</string>
+    <string name="item_class_useful">Useful</string>
+    <string name="item_class_filler">Filler</string>
+    <string name="item_class_trap">Trap</string>
+
+    <string name="edit_title">Edit multiworld</string>
+    <string name="edit_title_new">New multiworld</string>
+    <string name="edit_connection">Connection</string>
+    <string name="edit_name">Name</string>
+    <string name="edit_host">Server address</string>
+    <string name="edit_host_hint" translatable="false">archipelago.gg</string>
+    <string name="edit_port">Port</string>
+    <string name="edit_room_password">Room password (optional)</string>
+    <string name="password_none">No password</string>
+    <string name="password_show">Show password</string>
+    <string name="password_hide">Hide password</string>
+    <string name="probe_idle">Server not checked yet</string>
+    <string name="probe_checking">Checking server…</string>
+    <string name="probe_reachable">Server reachable</string>
+    <string name="probe_unreachable">Server not reachable</string>
+    <string name="probe_secure">Encrypted (wss), Archipelago %1$s</string>
+    <string name="probe_insecure">Unencrypted (ws), Archipelago %1$s</string>
+    <string name="probe_test">Test</string>
+    <string name="probe_retest">Test again</string>
+    <string name="edit_own_slots">My slots</string>
+    <string name="edit_add_slot">Add slot manually</string>
+    <string name="edit_add_named_slot">Add %1$s</string>
+    <string name="edit_other_slots">Other slots of this multiworld</string>
+    <string name="edit_other_slots_hint">Reported by the server. A password is only needed if the slot has one.</string>
+    <string name="edit_search_slots">Search slot or game</string>
+    <plurals name="edit_show_all">
+        <item quantity="one">Show %d</item>
+        <item quantity="other">Show all %d</item>
+    </plurals>
+    <string name="edit_behavior">Behavior</string>
+    <string name="edit_connect_on_start">Connect when the app starts</string>
+    <string name="edit_keep_in_background">Keep connected in the background</string>
+    <string name="edit_keep_in_background_hint">Needed for notifications while the app is closed</string>
+    <string name="edit_retention">Keep feed history</string>
+    <string name="retention_unlimited">Unlimited</string>
+    <plurals name="retention_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <string name="edit_remove">Remove multiworld</string>
+    <string name="edit_remove_title">Remove %1$s?</string>
+    <string name="edit_remove_text">Its settings and stored feed are deleted.</string>
+
+    <string name="slot_number">slot %1$d</string>
+    <string name="slot_connected">Connected as tracker</string>
+    <string name="slot_connected_hint">Runs alongside your game client</string>
+    <string name="slot_access">Access</string>
+    <string name="slot_name">Slot name</string>
+    <string name="slot_password">Slot password (optional)</string>
+    <string name="slot_highlight">Highlight in the feed</string>
+    <string name="slot_highlight_hint">Findings for and from this slot</string>
+    <string name="slot_notifications">Notifications for received items</string>
+    <string name="notify_item_type">Item type</string>
+    <string name="notify_off">Off</string>
+    <string name="notify_silent">Silent</string>
+    <string name="notify_sound">Sound</string>
+    <string name="notify_own_world">Items from your own world</string>
+    <string name="notify_own_world_hint">Also report items you found yourself</string>
+    <string name="notify_hints">New hints</string>
+    <string name="notify_hints_hint">When someone hints an item for you</string>
+    <string name="notify_mentions">Mentions in the chat</string>
+    <string name="notify_mentions_hint">When the slot name comes up in the chat</string>
+    <string name="slot_sync">Synchronization</string>
+    <string name="slot_sync_last_prefix">"Last reported: item "</string>
+    <string name="slot_sync_last_suffix">". Older items do not notify, not even after a reconnect."</string>
+    <string name="slot_sync_none">No item reported yet.</string>
+    <string name="slot_sync_unknown">Known once the slot is connected.</string>
+    <string name="slot_count_from_now">Count from now</string>
+    <string name="slot_remove">Remove slot</string>
+    <string name="slot_remove_title">Remove %1$s?</string>
+    <string name="slot_remove_text">The slot is removed when you save the multiworld.</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_feed_layout">Feed layout</string>
+    <string name="settings_layout_classic">Classic</string>
+    <string name="settings_layout_structured">Structured</string>
+    <string name="settings_feed_layout_hint">Classic shows one line per message like the Archipelago text client, structured shows the item first.</string>
 </resources>

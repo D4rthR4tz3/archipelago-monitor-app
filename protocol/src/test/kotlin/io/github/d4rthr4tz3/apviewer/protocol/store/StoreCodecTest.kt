@@ -20,14 +20,23 @@ class StoreCodecTest {
         label = "Friday seed",
         address = "archipelago.gg:38281",
         roomPassword = "room",
-        slots = listOf(SavedSlot("Link"), SavedSlot("Samus", password = "slot")),
+        slots = listOf(
+            SavedSlot("Link"),
+            SavedSlot(
+                "Samus",
+                password = "slot",
+                highlight = false,
+                notifications = SlotNotifications(filler = NotifyMode.SILENT),
+            ),
+        ),
+        feedRetentionDays = SavedMultiworld.RETENTION_UNLIMITED,
     )
 
     @Test
     fun `profiles survive a round trip`() {
         val profiles = Profiles(
             multiworlds = listOf(multiworld),
-            settings = AppSettings(feedRetentionDays = 3),
+            settings = AppSettings(connectionsEnabled = false, feedLayout = FeedLayout.STRUCTURED),
         )
 
         assertEquals(profiles, StoreCodec.decodeProfiles(StoreCodec.encodeProfiles(profiles)))
@@ -45,7 +54,7 @@ class StoreCodecTest {
             listOf(SavedMultiworld(id = "mw-1", address = "localhost")),
             profiles.multiworlds,
         )
-        assertEquals(AppSettings.DEFAULT_FEED_RETENTION_DAYS, profiles.settings.feedRetentionDays)
+        assertEquals(AppSettings(), profiles.settings)
     }
 
     @Test
@@ -90,6 +99,22 @@ class StoreCodecTest {
     }
 
     @Test
+    fun `item class follows the flag precedence`() {
+        assertEquals(ItemClass.PROGRESSION, ItemClass.of(ItemFlags.PROGRESSION or ItemFlags.TRAP))
+        assertEquals(ItemClass.USEFUL, ItemClass.of(ItemFlags.USEFUL or ItemFlags.TRAP))
+        assertEquals(ItemClass.TRAP, ItemClass.of(ItemFlags.TRAP))
+        assertEquals(ItemClass.FILLER, ItemClass.of(0))
+    }
+
+    @Test
+    fun `withMode changes only the given item class`() {
+        val changed = SlotNotifications().withMode(ItemClass.FILLER, NotifyMode.SOUND)
+
+        assertEquals(NotifyMode.SOUND, changed.mode(ItemClass.FILLER))
+        assertEquals(SlotNotifications().copy(filler = NotifyMode.SOUND), changed)
+    }
+
+    @Test
     fun `withMultiworld adds new and replaces existing multiworlds`() {
         val other = SavedMultiworld(id = "mw-2", address = "localhost")
         val renamed = multiworld.copy(label = "Renamed")
@@ -109,7 +134,10 @@ class StoreCodecTest {
             MultiworldConfig(
                 address = "archipelago.gg:38281",
                 roomPassword = "room",
-                slots = listOf(SlotConfig("Link"), SlotConfig("Samus", password = "slot")),
+                slots = listOf(
+                    SlotConfig("Link"),
+                    SlotConfig("Samus", password = "slot", highlight = false),
+                ),
             ),
             multiworld.toConfig(),
         )
