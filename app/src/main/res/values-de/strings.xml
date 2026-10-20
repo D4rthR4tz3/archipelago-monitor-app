@@ -68,6 +68,7 @@
     <string name="tab_hints">Hints</string>
     <string name="tab_items">Items</string>
     <string name="tab_count">(%1$d)</string>
+    <string name="new_count">(%1$d neue)</string>
     <string name="feed_multiworld_settings">Multiworld-Einstellungen</string>
     <string name="feed_empty">Noch keine Nachrichten.</string>
     <string name="feed_history">Gespeicherter Verlauf</string>

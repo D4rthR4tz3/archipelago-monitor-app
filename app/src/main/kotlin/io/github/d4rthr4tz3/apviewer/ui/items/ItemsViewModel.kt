@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /** A received item in the Items tab. */
@@ -27,33 +26,36 @@ data class ItemRow(
     val itemClass: ItemClass,
     /** The slot found the item in its own world. */
     val fromSelf: Boolean,
-    /** The item arrived since the user last looked at the Items tab. */
+    /** The item was not seen in the Items tab before the user opened its slot. */
     val isNew: Boolean,
 )
 
 data class ItemsState(
     val connected: Boolean = false,
     val slotNames: List<String> = emptyList(),
+    /** Number of new items of each slot, by slot name. */
+    val newCounts: Map<String, Int> = emptyMap(),
     val slot: String? = null,
     /** Items of [slot], newest first. */
     val rows: List<ItemRow> = emptyList(),
     /** Number of new items of [slot]. */
     val newCount: Int = 0,
-    /** Number of items of all of the user's slots not seen in the Items tab yet. */
+    /** Number of new items of all of the user's slots. */
     val unseenCount: Int = 0,
 )
 
 /**
  * Items the user's slots received in one multiworld. Items count as new if they arrived while the
- * app was connected and the user has not seen them in the Items tab.
+ * app was connected and the user has not seen them in the Items tab. Items shown in the tab count
+ * as seen only once the user leaves the slot, so the counters and markers stay while it is shown.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ItemsViewModel(private val container: AppContainer, private val multiworldId: String) :
     ViewModel() {
     private val slot = MutableStateFlow<String?>(null)
 
-    /** Seen index of each slot when the user opened it, so new rows stay marked while shown. */
-    private val seenWhenOpened = MutableStateFlow<Map<String, Int>>(emptyMap())
+    /** Slot shown in the tab and the newest item index shown, saved as seen on leaving it. */
+    private var shown: Pair<String, Int>? = null
 
     private val savedSlots: Flow<List<SavedSlot>> = container.profiles.profiles
         .map { it.multiworld(multiworldId)?.slots.orEmpty() }
@@ -79,29 +81,29 @@ class ItemsViewModel(private val container: AppContainer, private val multiworld
         container.sessions.status(multiworldId),
         itemsBySlot,
         slot,
-        seenWhenOpened,
-    ) { slots, status, items, selectedSlot, opened ->
+    ) { slots, status, items, selectedSlot ->
         val slotNames = slots.map { it.name }
         val selected = selectedSlot?.takeIf { it in slotNames } ?: slotNames.firstOrNull()
         val seen = slots.firstOrNull { it.name == selected }?.lastSeenItemIndex ?: -1
-        val newAbove = selected?.let { opened[it] } ?: seen
+        val newCounts = slots.associate { saved ->
+            saved.name to items[saved.name].orEmpty().count { it.isUnseen(saved.lastSeenItemIndex) }
+        }
         val rows = selected?.let { items[it] }.orEmpty().asReversed().map { item ->
             ItemRow(
                 item = item,
                 itemClass = ItemClass.of(item.item.flags),
                 fromSelf = item.senderName == selected,
-                isNew = item.isUnseen(newAbove),
+                isNew = item.isUnseen(seen),
             )
         }
         ItemsState(
             connected = status is MultiworldStatus.Connected,
             slotNames = slotNames,
+            newCounts = newCounts,
             slot = selected,
             rows = rows,
             newCount = rows.count { it.isNew },
-            unseenCount = slots.sumOf { saved ->
-                items[saved.name].orEmpty().count { it.isUnseen(saved.lastSeenItemIndex) }
-            },
+            unseenCount = newCounts.values.sum(),
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), ItemsState())
 
@@ -109,16 +111,34 @@ class ItemsViewModel(private val container: AppContainer, private val multiworld
         slot.value = value
     }
 
-    /** Marks the items of [slotName] up to [index] as seen; called while the tab shows them. */
+    /**
+     * Notes that the tab shows the items of [slotName] up to [index]. They are saved as seen when
+     * the user leaves the slot, by picking another one or with [leave].
+     */
     fun markSeen(slotName: String, index: Int) {
-        viewModelScope.launch {
+        val previous = shown
+        if (previous != null && previous.first != slotName) save(previous)
+        shown = slotName to index
+    }
+
+    /** Called when the tab is hidden: the items shown so far are saved as seen. */
+    fun leave() {
+        shown?.let(::save)
+        shown = null
+    }
+
+    override fun onCleared() {
+        leave()
+    }
+
+    /** Saves in the app scope, so the write also finishes when this view model is cleared. */
+    private fun save(seen: Pair<String, Int>) {
+        val (slotName, index) = seen
+        container.scope.launch {
             container.profiles.update { profiles ->
                 val multiworld = profiles.multiworld(multiworldId) ?: return@update profiles
                 val saved = multiworld.slots.firstOrNull { it.name == slotName }
                     ?: return@update profiles
-                seenWhenOpened.update {
-                    it + (slotName to (it[slotName] ?: saved.lastSeenItemIndex))
-                }
                 if (index <= saved.lastSeenItemIndex) return@update profiles
                 profiles.withMultiworld(
                     multiworld.copy(
@@ -129,11 +149,6 @@ class ItemsViewModel(private val container: AppContainer, private val multiworld
                 )
             }
         }
-    }
-
-    /** Called when the tab is hidden: rows seen so far are no longer marked when it opens again. */
-    fun leave() {
-        seenWhenOpened.value = emptyMap()
     }
 
     private companion object {

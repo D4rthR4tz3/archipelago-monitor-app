@@ -114,7 +114,7 @@ fun FeedRoute(multiworldId: String, onBack: () -> Unit, onEdit: () -> Unit) {
     val items by itemsViewModel.state.collectAsStateWithLifecycle()
     FeedScreen(
         state = state,
-        priorityHints = hints.priorityCount,
+        openHints = hints.openCount,
         unseenItems = items.unseenCount,
         onBack = onBack,
         onEdit = onEdit,
@@ -162,7 +162,7 @@ fun FeedRoute(multiworldId: String, onBack: () -> Unit, onEdit: () -> Unit) {
 @Composable
 fun FeedScreen(
     state: FeedState,
-    priorityHints: Int,
+    openHints: Int,
     unseenItems: Int,
     onBack: () -> Unit,
     onEdit: () -> Unit,
@@ -187,7 +187,7 @@ fun FeedScreen(
         FeedColumn(
             state = state,
             pagerState = pagerState,
-            priorityHints = priorityHints,
+            openHints = openHints,
             unseenItems = unseenItems,
             onTabChange = { scope.launch { pagerState.animateScrollToPage(it.ordinal) } },
             onBack = onBack,
@@ -215,7 +215,7 @@ fun FeedScreen(
 private fun FeedColumn(
     state: FeedState,
     pagerState: PagerState,
-    priorityHints: Int,
+    openHints: Int,
     unseenItems: Int,
     onTabChange: (MultiworldTab) -> Unit,
     onBack: () -> Unit,
@@ -257,10 +257,14 @@ private fun FeedColumn(
         )
         Tabs(
             pagerState = pagerState,
-            counts = mapOf(
-                MultiworldTab.HINTS to priorityHints,
-                MultiworldTab.ITEMS to unseenItems,
-            ),
+            badges = buildMap {
+                if (openHints > 0) {
+                    put(MultiworldTab.HINTS, stringResource(R.string.tab_count, openHints))
+                }
+                if (unseenItems > 0) {
+                    put(MultiworldTab.ITEMS, stringResource(R.string.new_count, unseenItems))
+                }
+            },
             onSelect = onTabChange,
         )
         val connecting = status == MultiworldStatus.Connecting
@@ -463,11 +467,14 @@ private fun FailureCard(
     }
 }
 
-/** Tab bar whose indicator follows [pagerState] while the tabs are swiped. */
+/**
+ * Tab bar whose indicator follows [pagerState] while the tabs are swiped. [badges] are shown next
+ * to the labels of their tabs.
+ */
 @Composable
 private fun Tabs(
     pagerState: PagerState,
-    counts: Map<MultiworldTab, Int>,
+    badges: Map<MultiworldTab, String>,
     onSelect: (MultiworldTab) -> Unit,
 ) {
     val tabs = listOf(
@@ -517,10 +524,9 @@ private fun Tabs(
                     fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
                     color = if (isSelected) ApColors.TextPrimary else ApColors.TextSecondary,
                 )
-                val count = counts[tab] ?: 0
-                if (count > 0) {
+                badges[tab]?.let { badge ->
                     Text(
-                        text = stringResource(R.string.tab_count, count),
+                        text = badge,
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Medium,
                         color = ApColors.TextSecondary,
@@ -879,7 +885,7 @@ private fun FeedScreenPreview() {
             onSay = { true },
             onConnect = {},
             onDisconnect = {},
-            priorityHints = 2,
+            openHints = 4,
             unseenItems = 3,
             hintsList = {},
             hintsTable = {},
