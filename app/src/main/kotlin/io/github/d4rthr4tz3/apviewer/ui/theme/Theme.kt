@@ -1,27 +1,48 @@
 package io.github.d4rthr4tz3.apviewer.ui.theme
 
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 
-/** App theme with dynamic colors on Android 12 and newer. */
+private val ColorScheme = darkColorScheme(
+    primary = ApColors.TextPrimary,
+    onPrimary = ApColors.Background,
+    secondary = ApColors.TextSecondary,
+    onSecondary = ApColors.Background,
+    background = ApColors.Background,
+    onBackground = ApColors.TextPrimary,
+    surface = ApColors.Background,
+    onSurface = ApColors.TextPrimary,
+    surfaceVariant = ApColors.Surface,
+    onSurfaceVariant = ApColors.TextSecondary,
+    surfaceContainer = ApColors.Surface,
+    surfaceContainerHigh = ApColors.Surface,
+    surfaceContainerHighest = ApColors.SegmentActive,
+    outline = ApColors.InputBorder,
+    outlineVariant = ApColors.Divider,
+    error = ApColors.Error,
+    onError = ApColors.Background,
+)
+
+/** Controls use 8 dp corners, surfaces 12 dp. */
+private val ApShapes = Shapes(
+    extraSmall = RoundedCornerShape(6.dp),
+    small = RoundedCornerShape(8.dp),
+    medium = RoundedCornerShape(12.dp),
+    large = RoundedCornerShape(12.dp),
+    extraLarge = RoundedCornerShape(12.dp),
+)
+
+/** The app's only theme: dark neutral gray, Geist, no dynamic colors. */
 @Composable
-fun ApViewerTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val colorScheme = when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> darkColorScheme()
-
-        else -> lightColorScheme()
-    }
-    MaterialTheme(colorScheme = colorScheme, content = content)
+fun ApViewerTheme(content: @Composable () -> Unit) {
+    MaterialTheme(
+        colorScheme = ColorScheme,
+        typography = ApTypography,
+        shapes = ApShapes,
+        content = content,
+    )
 }
