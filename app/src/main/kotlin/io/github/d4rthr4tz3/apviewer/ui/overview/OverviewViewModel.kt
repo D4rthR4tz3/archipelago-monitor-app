@@ -81,6 +81,14 @@ class OverviewViewModel(private val container: AppContainer) : ViewModel() {
         }
     }
 
+    /** Deletes the multiworld with [id] and its stored feed, like the edit screen does. */
+    fun remove(id: String) {
+        container.scope.launch {
+            container.profiles.removeMultiworld(id)
+            container.feed.deleteMultiworld(id)
+        }
+    }
+
     private companion object {
         const val STOP_TIMEOUT_MILLIS = 5_000L
     }
