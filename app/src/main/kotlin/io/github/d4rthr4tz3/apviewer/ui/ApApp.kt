@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
@@ -22,9 +23,22 @@ import io.github.d4rthr4tz3.apviewer.ui.settings.SettingsRoute
 import io.github.d4rthr4tz3.apviewer.ui.slot.SlotSettingsScreen
 import io.github.d4rthr4tz3.apviewer.ui.theme.ApColors
 
-/** Root of the app: shows the screen on top of the back stack. */
+/**
+ * Root of the app: shows the screen on top of the back stack. [openFeed] names a multiworld whose
+ * feed to open on top of the overview, for example from a notification; [onFeedOpened] confirms it.
+ */
 @Composable
-fun ApApp(navigator: Navigator = viewModel()) {
+fun ApApp(
+    openFeed: String? = null,
+    onFeedOpened: () -> Unit = {},
+    navigator: Navigator = viewModel(),
+) {
+    LaunchedEffect(openFeed) {
+        if (openFeed == null) return@LaunchedEffect
+        while (navigator.pop()) Unit
+        navigator.push(Destination.Feed(openFeed))
+        onFeedOpened()
+    }
     val entry = navigator.current
     val stateHolder = rememberSaveableStateHolder()
     BackHandler(enabled = navigator.stack.size > 1) { navigator.pop() }

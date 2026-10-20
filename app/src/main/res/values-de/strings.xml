@@ -196,4 +196,41 @@
     <string name="settings_layout_classic">Klassisch</string>
     <string name="settings_layout_structured">Strukturiert</string>
     <string name="settings_feed_layout_hint">Klassisch zeigt eine Zeile pro Nachricht wie der Archipelago-Textclient, strukturiert zeigt das Item zuerst.</string>
+
+    <string name="action_pause">Pausieren</string>
+    <string name="channel_status">Verbindungsstatus</string>
+    <string name="channel_items">Items mit Ton</string>
+    <string name="channel_items_silent">Items ohne Ton</string>
+    <string name="channel_hints">Neue Hints</string>
+    <string name="channel_mentions">Erwähnungen im Chat</string>
+    <plurals name="multiworld_count">
+        <item quantity="one">%d Multiworld</item>
+        <item quantity="other">%d Multiworlds</item>
+    </plurals>
+    <string name="notify_status_connected">%1$s in %2$s verbunden</string>
+    <string name="notify_status_connecting">%s verbindet</string>
+    <string name="notify_status_reconnecting">%s verbindet neu</string>
+    <string name="notify_status_offline">%s wartet auf Netz</string>
+    <string name="notify_status_failed">%s kann nicht verbinden</string>
+    <string name="notify_item_to">an %1$s von %2$s</string>
+    <string name="notify_hint_for">für %s</string>
+    <string name="notify_hint_at">bei %1$s, %2$s</string>
+    <string name="notify_mention">Chat erwähnt %s</string>
+    <string name="notify_show_feed">Im Feed zeigen</string>
+    <plurals name="notify_items">
+        <item quantity="one">%d neues Item</item>
+        <item quantity="other">%d neue Items</item>
+    </plurals>
+    <plurals name="notify_hints">
+        <item quantity="one">Neuer Hint</item>
+        <item quantity="other">%d neue Hints</item>
+    </plurals>
+    <plurals name="notify_mentions">
+        <item quantity="one">%d Erwähnung im Chat</item>
+        <item quantity="other">%d Erwähnungen im Chat</item>
+    </plurals>
+    <plurals name="notify_more">
+        <item quantity="one">%d weiteres</item>
+        <item quantity="other">%d weitere</item>
+    </plurals>
 </resources>
