@@ -70,6 +70,17 @@ class SlotConnectionTest {
     }
 
     @Test
+    fun `reports the version of the server as client version`() = runTest {
+        connection().start()
+        runCurrent()
+        factory.last.receive(TestRoom.roomInfo)
+        runCurrent()
+
+        val connect = factory.last.sentOf<ClientPacket.Connect>().single()
+        assertEquals(TestRoom.roomInfo.version, connect.version)
+    }
+
+    @Test
     fun `requests the data package only for games without a matching cache entry`() = runTest {
         cache.put("A Link to the Past", GameData(checksum = "abc"))
         connection().start()
