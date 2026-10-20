@@ -15,15 +15,23 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,6 +54,7 @@ import io.github.d4rthr4tz3.apviewer.ui.components.ScreenHeader
 import io.github.d4rthr4tz3.apviewer.ui.components.SectionTitle
 import io.github.d4rthr4tz3.apviewer.ui.containerViewModel
 import io.github.d4rthr4tz3.apviewer.ui.formatClock
+import io.github.d4rthr4tz3.apviewer.ui.multiworld.ConfirmDialog
 import io.github.d4rthr4tz3.apviewer.ui.statusDetail
 import io.github.d4rthr4tz3.apviewer.ui.statusLabel
 import io.github.d4rthr4tz3.apviewer.ui.theme.ApColors
@@ -78,6 +87,7 @@ fun OverviewScreen(
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val empty = state.loaded && state.rows.isEmpty()
     Box(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             ScreenHeader(
@@ -90,15 +100,10 @@ fun OverviewScreen(
                     )
                 },
             )
-            ConnectionsCard(state = state, onCheckedChange = onConnectionsEnabledChange)
-            if (state.loaded && state.rows.isEmpty()) {
-                Text(
-                    text = stringResource(R.string.overview_empty),
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = ApColors.TextTertiary,
-                )
+            if (empty) {
+                EmptyOverview(onAddMultiworld = onAddMultiworld, modifier = Modifier.weight(1f))
             } else if (state.rows.isNotEmpty()) {
+                ConnectionsCard(state = state, onCheckedChange = onConnectionsEnabledChange)
                 SectionTitle(
                     text = stringResource(R.string.overview_multiworlds),
                     modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 8.dp),
@@ -112,20 +117,69 @@ fun OverviewScreen(
                 }
             }
         }
+        if (state.rows.isNotEmpty()) {
+            PrimaryButton(
+                text = stringResource(R.string.overview_add),
+                onClick = onAddMultiworld,
+                icon = R.drawable.ic_add,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 16.dp, bottom = 24.dp)
+                    .height(56.dp),
+            )
+        }
+    }
+}
+
+/** First start: what the app does and the button to add a multiworld. */
+@Composable
+private fun EmptyOverview(onAddMultiworld: () -> Unit, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 32.dp, end = 32.dp, bottom = 120.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+    ) {
+        Text(
+            text = stringResource(R.string.overview_empty),
+            modifier = Modifier.semantics { heading() },
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = ApColors.TextPrimary,
+        )
+        Text(
+            text = stringResource(R.string.overview_empty_text),
+            style = MaterialTheme.typography.bodyLarge,
+            color = ApColors.TextSecondary,
+        )
         PrimaryButton(
-            text = stringResource(R.string.overview_add),
+            text = stringResource(R.string.overview_empty_add),
             onClick = onAddMultiworld,
             icon = R.drawable.ic_add,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 16.dp, bottom = 24.dp)
-                .height(56.dp),
+            modifier = Modifier.padding(top = 12.dp).height(48.dp),
         )
     }
 }
 
 @Composable
 private fun ConnectionsCard(state: OverviewState, onCheckedChange: (Boolean) -> Unit) {
+    // The card sits at the top of the screen, so turning everything off asks first.
+    var confirmOff by rememberSaveable { mutableStateOf(false) }
+    val onChange = { enabled: Boolean ->
+        if (enabled) onCheckedChange(true) else confirmOff = true
+    }
+    if (confirmOff) {
+        ConfirmDialog(
+            title = stringResource(R.string.overview_disable_title),
+            text = stringResource(R.string.overview_disable_text),
+            confirm = stringResource(R.string.overview_disable_confirm),
+            onConfirm = {
+                confirmOff = false
+                onCheckedChange(false)
+            },
+            onDismiss = { confirmOff = false },
+        )
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -134,7 +188,7 @@ private fun ConnectionsCard(state: OverviewState, onCheckedChange: (Boolean) -> 
             .toggleable(
                 value = state.connectionsEnabled,
                 role = Role.Switch,
-                onValueChange = onCheckedChange,
+                onValueChange = onChange,
             )
             .padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -155,7 +209,7 @@ private fun ConnectionsCard(state: OverviewState, onCheckedChange: (Boolean) -> 
                 color = ApColors.TextSecondary,
             )
         }
-        ApSwitch(checked = state.connectionsEnabled, onCheckedChange = onCheckedChange)
+        ApSwitch(checked = state.connectionsEnabled, onCheckedChange = onChange)
     }
 }
 
@@ -171,13 +225,38 @@ private fun MultiworldListItem(row: MultiworldRow, onClick: () -> Unit) {
     val detail = statusDetail(row.status) ?: row.latestForMe
         ?.takeUnless { disconnected }
         ?.let { latestItemText(it) }
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+            .padding(start = 20.dp, end = 12.dp, top = 16.dp, bottom = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
+        MultiworldSummary(
+            row = row,
+            disconnected = disconnected,
+            statusColor = statusColor,
+            detail = detail,
+            modifier = Modifier.weight(1f),
+        )
+        Icon(
+            painter = painterResource(R.drawable.ic_chevron_right),
+            contentDescription = null,
+            tint = ApColors.TextTertiary,
+        )
+    }
+}
+
+@Composable
+private fun MultiworldSummary(
+    row: MultiworldRow,
+    disconnected: Boolean,
+    statusColor: Color,
+    detail: String?,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(
                 text = row.name,

@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -33,8 +32,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -184,14 +181,6 @@ private fun AccessSection(slot: SavedSlot, onEdit: ((SavedSlot) -> SavedSlot) ->
             onValueChange = { name -> onEdit { it.copy(name = name) } },
             label = stringResource(R.string.slot_name),
             monospace = true,
-        )
-        LabeledTextField(
-            value = slot.password,
-            onValueChange = { password -> onEdit { it.copy(password = password) } },
-            label = stringResource(R.string.slot_password),
-            placeholder = stringResource(R.string.password_none),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            visualTransformation = PasswordVisualTransformation(),
         )
         SwitchRow(
             label = stringResource(R.string.slot_highlight),

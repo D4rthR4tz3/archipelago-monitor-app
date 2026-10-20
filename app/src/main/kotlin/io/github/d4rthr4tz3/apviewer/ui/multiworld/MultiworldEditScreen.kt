@@ -55,6 +55,7 @@ import io.github.d4rthr4tz3.apviewer.ui.components.ScreenHeader
 import io.github.d4rthr4tz3.apviewer.ui.components.SecondaryButton
 import io.github.d4rthr4tz3.apviewer.ui.components.SectionTitle
 import io.github.d4rthr4tz3.apviewer.ui.components.SwitchRow
+import io.github.d4rthr4tz3.apviewer.ui.statusDetail
 import io.github.d4rthr4tz3.apviewer.ui.statusLabel
 import io.github.d4rthr4tz3.apviewer.ui.theme.ApColors
 
@@ -97,6 +98,9 @@ fun MultiworldEditScreen(
             },
         )
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+            if (!viewModel.isNew) {
+                LiveStatusCard(status = status, onConnect = viewModel::connect)
+            }
             ConnectionSection(
                 draft = current,
                 probe = probe,
@@ -161,6 +165,48 @@ fun MultiworldEditScreen(
             },
             onDismiss = { addSlotDialog = false },
         )
+    }
+}
+
+/** Current connection state with a button to connect or reconnect right away. */
+@Composable
+private fun LiveStatusCard(status: MultiworldStatus, onConnect: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 8.dp)
+            .background(ApColors.Surface, MaterialTheme.shapes.medium)
+            .padding(start = 16.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                text = statusLabel(status),
+                style = MaterialTheme.typography.labelLarge,
+                color = when (status) {
+                    is MultiworldStatus.Failed -> ApColors.Error
+                    is MultiworldStatus.Reconnecting -> ApColors.Warning
+                    else -> ApColors.TextPrimary
+                },
+            )
+            statusDetail(status)?.let { detail ->
+                Text(
+                    text = detail,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = ApColors.TextSecondary,
+                )
+            }
+        }
+        val action = when (status) {
+            MultiworldStatus.Connecting -> null
+            MultiworldStatus.Disconnected, is MultiworldStatus.Failed -> R.string.action_connect
+            is MultiworldStatus.Reconnecting -> R.string.action_connect_now
+            is MultiworldStatus.Connected -> R.string.action_reconnect
+        }
+        if (action != null) {
+            SecondaryButton(text = stringResource(action), onClick = onConnect)
+        }
     }
 }
 

@@ -2,7 +2,6 @@ package io.github.d4rthr4tz3.apviewer.protocol.session
 
 import io.github.d4rthr4tz3.apviewer.protocol.client.PacketSocketFactory
 import io.github.d4rthr4tz3.apviewer.protocol.message.FeedMessage
-import io.github.d4rthr4tz3.apviewer.protocol.model.HintStatus
 import io.github.d4rthr4tz3.apviewer.protocol.monitor.FeedEntry
 import io.github.d4rthr4tz3.apviewer.protocol.store.DataPackageCache
 import io.github.d4rthr4tz3.apviewer.protocol.store.ItemIndexStore
@@ -24,8 +23,6 @@ import kotlinx.coroutines.launch
 /** One of the user's slots in a multiworld. */
 data class SlotConfig(
     val name: String,
-    /** Overrides the room password for this slot if not empty. */
-    val password: String = "",
     /** Whether items for and from this slot are highlighted in the feed. */
     val highlight: Boolean = true,
 )
@@ -33,6 +30,7 @@ data class SlotConfig(
 /** A multiworld room and the user's slots in it. */
 data class MultiworldConfig(
     val address: String,
+    /** Server password; Archipelago has one password per room, not per slot. */
     val roomPassword: String = "",
     val slots: List<SlotConfig>,
 )
@@ -74,13 +72,14 @@ class MultiworldSession(
             config = SlotConnectionConfig(
                 address = config.address,
                 slotName = slot.name,
-                password = slot.password.ifEmpty { config.roomPassword },
+                password = config.roomPassword,
                 ownSlotNames = config.slots.filter { it.highlight }.map { it.name }.toSet(),
             ),
             itemIndexStore = itemIndexStore,
             dataPackageCache = dataPackageCache,
             reconnectPolicy = reconnectPolicy,
             uuid = uuid,
+            clock = clock,
         )
     }
 
@@ -140,20 +139,14 @@ class MultiworldSession(
         stopCollectors()
     }
 
+    /** Ends the wait of every slot that waits to reconnect. */
+    fun retryNow() {
+        slots.forEach { it.retryNow() }
+    }
+
     /** Sends [text] as chat message or command from [slotName]. Returns `false` if not sent. */
     fun say(slotName: String, text: String): Boolean =
         slots.firstOrNull { it.config.slotName == slotName }?.say(text) ?: false
-
-    /**
-     * Sets the [status] of [hint], sent by the connected slot that receives its item. Returns
-     * `false` if no such slot is connected.
-     */
-    fun updateHint(hint: SlotHint, status: HintStatus): Boolean {
-        val receiver = slots.firstOrNull { slot ->
-            (slot.state.value as? SlotState.Connected)?.info?.slot == hint.receivingSlot
-        } ?: return false
-        return receiver.updateHint(hint.findingSlot, hint.locationId, status)
-    }
 
     @Synchronized
     private fun append(message: FeedMessage) {

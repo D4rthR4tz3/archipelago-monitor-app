@@ -6,7 +6,6 @@ import io.github.d4rthr4tz3.apviewer.AppContainer
 import io.github.d4rthr4tz3.apviewer.protocol.model.HintStatus
 import io.github.d4rthr4tz3.apviewer.protocol.session.MultiworldHint
 import io.github.d4rthr4tz3.apviewer.protocol.session.MultiworldStatus
-import io.github.d4rthr4tz3.apviewer.protocol.session.SlotHint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -87,10 +86,6 @@ class HintsViewModel(private val container: AppContainer, private val multiworld
         sortColumn.value = value
     }
 
-    /** Sets the [status] of [hint]. Returns `false` if it could not be sent. */
-    fun updateStatus(hint: SlotHint, status: HintStatus): Boolean =
-        container.sessions.updateHint(multiworldId, hint, status)
-
     private data class Options(
         val direction: HintDirection,
         val slot: String?,
@@ -102,14 +97,6 @@ class HintsViewModel(private val container: AppContainer, private val multiworld
         const val STOP_TIMEOUT_MILLIS = 5_000L
     }
 }
-
-/** Statuses the receiver can choose, in menu order. */
-val selectableHintStatuses = listOf(
-    HintStatus.PRIORITY,
-    HintStatus.UNSPECIFIED,
-    HintStatus.NO_PRIORITY,
-    HintStatus.AVOID,
-)
 
 /** Position of a status when sorting: priority first, found last. */
 val HintStatus.sortOrder: Int

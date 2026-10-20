@@ -22,9 +22,10 @@ import kotlinx.coroutines.launch
 data class FeedState(
     val loaded: Boolean = false,
     val name: String = "",
+    val address: String = "",
     val slotNames: List<String> = emptyList(),
     val status: MultiworldStatus = MultiworldStatus.Disconnected,
-    val layout: FeedLayout = FeedLayout.CLASSIC,
+    val layout: FeedLayout = FeedLayout.STRUCTURED,
     val entries: List<FeedEntry> = emptyList(),
     val filter: FeedFilter = FeedFilter.ALL,
     val itemClasses: Set<ItemClass> = ItemClass.entries.toSet(),
@@ -52,6 +53,7 @@ class FeedViewModel(private val container: AppContainer, private val multiworldI
         FeedState(
             loaded = true,
             name = multiworld?.displayName.orEmpty(),
+            address = multiworld?.address.orEmpty(),
             slotNames = slotNames,
             status = status,
             layout = profiles.settings.feedLayout,
@@ -98,6 +100,8 @@ class FeedViewModel(private val container: AppContainer, private val multiworldI
     }
 
     fun connect() = container.sessions.connect(multiworldId)
+
+    fun disconnect() = container.sessions.disconnect(multiworldId)
 
     private companion object {
         const val STOP_TIMEOUT_MILLIS = 5_000L

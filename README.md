@@ -15,10 +15,14 @@ What works so far:
 - Feed per multiworld with filters (all, for me, from me, chat, item types), classic or structured
   layout, stored history and a chat input that sends as one of your slots.
 - Multiworld and slot settings, including a server check and the other slots of the room.
-- Hints per multiworld, read live from the server: a list filtered by direction and slot, with
-  a status menu for hints you receive, and a sortable table in landscape.
+- Hints per multiworld, read live from the server: a list filtered by direction and slot, and a
+  sortable table in landscape.
+- Received items per slot, newest first, with the item type filter of the feed; items that arrived
+  since the tab was last opened are marked as new.
+- Empty overview on first start, a connecting state and a failure card with the reason and the way
+  to fix it.
 
-Planned next: the open design points, then the background service with notifications. See
+Planned next: the background service with notifications. See
 [docs/product/roadmap.md](docs/product/roadmap.md).
 
 ## Modules

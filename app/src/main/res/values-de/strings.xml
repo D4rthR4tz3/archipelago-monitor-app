@@ -3,7 +3,9 @@
     <string name="action_add">Hinzufügen</string>
     <string name="action_back">Zurück</string>
     <string name="action_cancel">Abbrechen</string>
+    <string name="action_reconnect">Erneut verbinden</string>
     <string name="action_close">Schließen</string>
+    <string name="action_connect_now">Jetzt verbinden</string>
     <string name="action_connect">Verbinden</string>
     <string name="action_disconnect">Trennen</string>
     <string name="action_remove">Entfernen</string>
@@ -31,11 +33,26 @@
     <string name="error_invalid_password">falsches Passwort</string>
     <string name="error_incompatible_version">inkompatible Version</string>
 
+    <string name="failure_refused">Verbindung abgelehnt</string>
+    <string name="failure_unreachable">Server nicht erreichbar</string>
+    <string name="failure_connection_lost">Verbindung verloren</string>
+    <string name="failure_invalid_password">Falsches Server-Passwort</string>
+    <string name="failure_invalid_password_advice">Der Server hat die Verbindung abgelehnt. Prüfe das Passwort in den Multiworld-Einstellungen.</string>
+    <string name="failure_invalid_slot">Unbekannter Slot</string>
+    <string name="failure_invalid_slot_advice">Der Server kennt den Slot „%1$s“ nicht. Prüfe den Slotnamen in den Multiworld-Einstellungen.</string>
+    <string name="failure_incompatible_version">Inkompatible Version</string>
+    <string name="list_and">%1$s und %2$s</string>
+
     <string name="overview_settings">App-Einstellungen</string>
     <string name="overview_connections">Verbindungen aktiv</string>
     <string name="overview_active_slots">%1$d von %2$d Slots aktiv</string>
+    <string name="overview_disable_title">Alle Verbindungen trennen?</string>
+    <string name="overview_disable_text">Alle Multiworlds werden getrennt. Chat und Meldungen aus dieser Zeit fehlen danach im Feed, empfangene Items kommen beim erneuten Verbinden nach.</string>
+    <string name="overview_disable_confirm">Trennen</string>
     <string name="overview_multiworlds">Multiworlds</string>
-    <string name="overview_empty">Noch keine Multiworld. Füge eine hinzu, um einen Raum zu beobachten.</string>
+    <string name="overview_empty">Noch keine Multiworld</string>
+    <string name="overview_empty_text">Füge eine Multiworld mit Serveradresse und deinen Slotnamen hinzu. Die App verbindet sich als Tracker und stört deinen Spielclient nicht.</string>
+    <string name="overview_empty_add">Multiworld hinzufügen</string>
     <string name="overview_add">Multiworld</string>
     <string name="overview_latest_item">%1$s %2$s an %3$s</string>
     <plurals name="overview_unread">
@@ -45,8 +62,13 @@
 
     <string name="tab_feed">Feed</string>
     <string name="tab_hints">Hints</string>
+    <string name="tab_items">Items</string>
+    <string name="tab_count">(%1$d)</string>
     <string name="feed_multiworld_settings">Multiworld-Einstellungen</string>
     <string name="feed_empty">Noch keine Nachrichten.</string>
+    <string name="feed_history">Gespeicherter Verlauf</string>
+    <string name="feed_connecting_to">Verbinde mit %1$s</string>
+    <string name="feed_connecting_hint">Nachrichten erscheinen, sobald die Verbindung steht.</string>
     <string name="feed_to">" an "</string>
     <string name="feed_themselves">sich selbst</string>
     <string name="filter_all">Alle</string>
@@ -54,8 +76,8 @@
     <string name="filter_from_me">Von mir</string>
     <string name="filter_chat">Chat</string>
     <string name="filter_item_types">Nach Item-Typ filtern</string>
-    <string name="hints_receive">Ich empfange</string>
-    <string name="hints_find">Ich finde</string>
+    <string name="hints_receive">Für mich</string>
+    <string name="hints_find">Zu finden</string>
     <string name="hints_all_slots">Alle meine Slots</string>
     <string name="hints_hide_found">Gefundene ausblenden</string>
     <string name="hints_item">Item</string>
@@ -64,16 +86,23 @@
     <string name="hints_location">Location</string>
     <string name="hints_entrance">Entrance</string>
     <string name="hints_status">Status</string>
-    <string name="hints_change_status">Status ändern: %1$s</string>
     <string name="hints_sort_by">Nach %1$s sortieren</string>
     <string name="hints_empty">Keine Hints.</string>
     <string name="hints_offline">Hints erscheinen, sobald die Multiworld verbunden ist.</string>
-    <string name="hints_tab_count">(%1$d)</string>
     <string name="hint_status_priority">Priorität</string>
     <string name="hint_status_open">Offen</string>
     <string name="hint_status_no_priority">Unwichtig</string>
     <string name="hint_status_avoid">Vermeiden</string>
     <string name="hint_status_found">Gefunden</string>
+    <plurals name="items_received">
+        <item quantity="one">%d Item empfangen</item>
+        <item quantity="other">%d Items empfangen</item>
+    </plurals>
+    <string name="items_index">#%1$d</string>
+    <string name="items_from_prefix">"von "</string>
+    <string name="items_empty">Noch keine Items empfangen.</string>
+    <string name="items_filtered">Keine Items dieser Typen.</string>
+    <string name="items_offline">Items erscheinen, sobald die Multiworld verbunden ist.</string>
     <string name="say_placeholder">Nachricht oder !hint</string>
     <string name="say_send">Senden</string>
     <string name="say_as">Senden als %1$s</string>
@@ -83,6 +112,9 @@
     <string name="item_class_useful">Nützlich</string>
     <string name="item_class_filler">Filler</string>
     <string name="item_class_trap">Falle</string>
+    <string name="item_filter_title">Item-Typen</string>
+    <string name="item_filter_show_all">Alle anzeigen</string>
+    <string name="item_filter_note">Gilt für den Feed und die empfangenen Items. Chat und Server-Meldungen bleiben immer sichtbar.</string>
 
     <string name="edit_title">Multiworld bearbeiten</string>
     <string name="edit_title_new">Neue Multiworld</string>
@@ -90,7 +122,7 @@
     <string name="edit_name">Name</string>
     <string name="edit_host">Server-Adresse</string>
     <string name="edit_port">Port</string>
-    <string name="edit_room_password">Raum-Passwort (optional)</string>
+    <string name="edit_room_password">Server-Passwort (optional)</string>
     <string name="password_none">Kein Passwort</string>
     <string name="password_show">Passwort anzeigen</string>
     <string name="password_hide">Passwort verbergen</string>
@@ -106,7 +138,7 @@
     <string name="edit_add_slot">Slot manuell hinzufügen</string>
     <string name="edit_add_named_slot">%1$s hinzufügen</string>
     <string name="edit_other_slots">Weitere Slots dieser Multiworld</string>
-    <string name="edit_other_slots_hint">Vom Server gemeldet. Ein Passwort ist nur nötig, wenn der Slot eines hat.</string>
+    <string name="edit_other_slots_hint">Vom Server gemeldet. Mit + fügst du einen als eigenen Slot hinzu.</string>
     <string name="edit_search_slots">Slot oder Spiel suchen</string>
     <plurals name="edit_show_all">
         <item quantity="one">%d anzeigen</item>
@@ -131,7 +163,6 @@
     <string name="slot_connected_hint">Läuft parallel zu deinem Spielclient</string>
     <string name="slot_access">Zugang</string>
     <string name="slot_name">Slotname</string>
-    <string name="slot_password">Slot-Passwort (optional)</string>
     <string name="slot_highlight">Im Feed hervorheben</string>
     <string name="slot_highlight_hint">Findings für und von diesem Slot</string>
     <string name="slot_notifications">Benachrichtigungen bei erhaltenen Items</string>

@@ -60,11 +60,11 @@ data class SlotNotifications(
 @Serializable
 data class SavedSlot(
     val name: String,
-    /** Overrides the room password for this slot if not empty. */
-    val password: String = "",
     /** Whether items for and from this slot are highlighted in the feed. */
     val highlight: Boolean = true,
     val notifications: SlotNotifications = SlotNotifications(),
+    /** Index of the newest received item the user has seen in the Items tab, `-1` if none. */
+    val lastSeenItemIndex: Int = -1,
 )
 
 /**
@@ -95,7 +95,7 @@ data class SavedMultiworld(
         address = address,
         roomPassword = roomPassword,
         slots = slots.map {
-            SlotConfig(name = it.name, password = it.password, highlight = it.highlight)
+            SlotConfig(name = it.name, highlight = it.highlight)
         },
     )
 
@@ -119,7 +119,7 @@ enum class FeedLayout {
 data class AppSettings(
     /** Master switch: when off, no multiworld is connected. */
     val connectionsEnabled: Boolean = true,
-    val feedLayout: FeedLayout = FeedLayout.CLASSIC,
+    val feedLayout: FeedLayout = FeedLayout.STRUCTURED,
 )
 
 /** Everything the user configured: saved multiworlds and settings. */
