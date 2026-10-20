@@ -7,14 +7,17 @@ resolved and colored like in the Archipelago text client.
 
 ## Status
 
-Early scaffold. What works so far:
+What works so far:
 
-- Connect form for server address, slot name and optional password.
-- Connection via `wss://` with fallback to `ws://`, default port 38281.
-- Live message feed of the room with resolved names and item classification colors.
+- Several multiworlds with several slots each, saved on the device. Every slot connects as a
+  tracker; only the first one receives the room's text.
+- Overview with connection state, new items for your slots and the latest one.
+- Feed per multiworld with filters (all, for me, from me, chat, item types), classic or structured
+  layout, stored history and a chat input that sends as one of your slots.
+- Multiworld and slot settings, including a server check and the other slots of the room.
 
-Planned next: background connection with notifications, filters (own slot, progression items),
-hint overview, saved connection profiles and caching of the data package.
+Planned next: hints, then the background service with notifications. See
+[docs/product/roadmap.md](docs/product/roadmap.md).
 
 ## Modules
 

@@ -25,14 +25,17 @@ Build order towards the [brief](brief.md). Each step is one pull request.
 
 ## Steps
 
+Steps 1 to 3 are done. The background service comes last, once the app works in the foreground
+(decided 2026-10-20).
+
 1. **Design foundation**: theme tokens, Geist fonts, fixed dark theme; feed rows restyled to the
    design (classic layout, highlights, 4 px gap).
 2. **Protocol for many slots**: per-multiworld session with one text connection and `NoText` for the
    others, reconnect with backoff, `ReceivedItems` index tracking, data package cache, `Say`.
 3. **Persistence**: DataStore for multiworlds and slots, Room for feed, hints and item indices.
-4. **Background service and notifications**: foreground service for all active slots, channels per
-   item type, grouped item notifications, ongoing status notification.
-5. **Screens**: overview, multiworld edit, slot settings, feed with filters and input.
-6. **Hints**: hint list and wide table, status menu with `UpdateHint`, hint notifications.
-7. **Open design points** (after they are designed): received items tab, item type filter sheet,
+4. **Screens**: overview, multiworld edit, slot settings, feed with filters and input.
+5. **Hints**: hint list and wide table, status menu with `UpdateHint`.
+6. **Open design points** (after they are designed): received items tab, item type filter sheet,
    empty, loading and error states.
+7. **Background service and notifications**: foreground service for all active slots, channels per
+   item type, grouped item notifications, hint notifications, ongoing status notification.
