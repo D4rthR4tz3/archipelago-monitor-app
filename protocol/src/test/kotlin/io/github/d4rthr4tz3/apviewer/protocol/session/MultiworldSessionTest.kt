@@ -30,7 +30,7 @@ class MultiworldSessionTest {
         config = MultiworldConfig(
             address = "localhost",
             roomPassword = "room",
-            slots = listOf(SlotConfig("Link"), SlotConfig("Zelda", password = "own")),
+            slots = listOf(SlotConfig("Link"), SlotConfig("Zelda")),
         ),
         itemIndexStore = InMemoryItemIndexStore(),
         dataPackageCache = InMemoryDataPackageCache(),
@@ -99,11 +99,11 @@ class MultiworldSessionTest {
     }
 
     @Test
-    fun `uses the room password unless a slot has its own`() = runTest {
+    fun `connects every slot with the room password`() = runTest {
         val (link, zelda) = connect(session())
 
         assertEquals("room", link.connectPacket().password)
-        assertEquals("own", zelda.connectPacket().password)
+        assertEquals("room", zelda.connectPacket().password)
     }
 
     @Test

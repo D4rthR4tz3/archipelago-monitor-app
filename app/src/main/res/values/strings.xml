@@ -56,8 +56,8 @@
     <string name="filter_from_me">From me</string>
     <string name="filter_chat">Chat</string>
     <string name="filter_item_types">Filter by item type</string>
-    <string name="hints_receive">I receive</string>
-    <string name="hints_find">I find</string>
+    <string name="hints_receive">For me</string>
+    <string name="hints_find">From me</string>
     <string name="hints_all_slots">All my slots</string>
     <string name="hints_hide_found">Hide found</string>
     <string name="hints_item">Item</string>
@@ -66,7 +66,6 @@
     <string name="hints_location">Location</string>
     <string name="hints_entrance">Entrance</string>
     <string name="hints_status">Status</string>
-    <string name="hints_change_status">Change status: %1$s</string>
     <string name="hints_sort_by">Sort by %1$s</string>
     <string name="hints_empty">No hints.</string>
     <string name="hints_offline">Hints appear once the multiworld is connected.</string>
@@ -93,7 +92,7 @@
     <string name="edit_host">Server address</string>
     <string name="edit_host_hint" translatable="false">archipelago.gg</string>
     <string name="edit_port">Port</string>
-    <string name="edit_room_password">Room password (optional)</string>
+    <string name="edit_room_password">Server password (optional)</string>
     <string name="password_none">No password</string>
     <string name="password_show">Show password</string>
     <string name="password_hide">Hide password</string>
@@ -109,7 +108,7 @@
     <string name="edit_add_slot">Add slot manually</string>
     <string name="edit_add_named_slot">Add %1$s</string>
     <string name="edit_other_slots">Other slots of this multiworld</string>
-    <string name="edit_other_slots_hint">Reported by the server. A password is only needed if the slot has one.</string>
+    <string name="edit_other_slots_hint">Reported by the server. Use + to add one as your own slot.</string>
     <string name="edit_search_slots">Search slot or game</string>
     <plurals name="edit_show_all">
         <item quantity="one">Show %d</item>
@@ -134,7 +133,6 @@
     <string name="slot_connected_hint">Runs alongside your game client</string>
     <string name="slot_access">Access</string>
     <string name="slot_name">Slot name</string>
-    <string name="slot_password">Slot password (optional)</string>
     <string name="slot_highlight">Highlight in the feed</string>
     <string name="slot_highlight_hint">Findings for and from this slot</string>
     <string name="slot_notifications">Notifications for received items</string>

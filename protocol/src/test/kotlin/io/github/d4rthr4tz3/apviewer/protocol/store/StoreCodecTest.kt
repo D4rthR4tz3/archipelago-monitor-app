@@ -24,7 +24,6 @@ class StoreCodecTest {
             SavedSlot("Link"),
             SavedSlot(
                 "Samus",
-                password = "slot",
                 highlight = false,
                 notifications = SlotNotifications(filler = NotifyMode.SILENT),
             ),
@@ -136,7 +135,7 @@ class StoreCodecTest {
                 roomPassword = "room",
                 slots = listOf(
                     SlotConfig("Link"),
-                    SlotConfig("Samus", password = "slot", highlight = false),
+                    SlotConfig("Samus", highlight = false),
                 ),
             ),
             multiworld.toConfig(),

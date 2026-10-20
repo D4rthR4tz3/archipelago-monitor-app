@@ -7,7 +7,6 @@ import io.github.d4rthr4tz3.apviewer.protocol.message.MessageRenderer
 import io.github.d4rthr4tz3.apviewer.protocol.message.NameResolver
 import io.github.d4rthr4tz3.apviewer.protocol.model.GameData
 import io.github.d4rthr4tz3.apviewer.protocol.model.Hint
-import io.github.d4rthr4tz3.apviewer.protocol.model.HintStatus
 import io.github.d4rthr4tz3.apviewer.protocol.model.NetworkVersion
 import io.github.d4rthr4tz3.apviewer.protocol.monitor.FailureReason
 import io.github.d4rthr4tz3.apviewer.protocol.packet.ClientPacket
@@ -103,16 +102,6 @@ class SlotConnection(
         val current = session?.takeIf { _state.value is SlotState.Connected } ?: return false
         scope.launch { current.markAllReported() }
         return true
-    }
-
-    /**
-     * Sets the [status] of the hint for [location] in the world of [findingSlot]. Only works for
-     * hints this slot receives. Returns `false` if not connected.
-     */
-    fun updateHint(findingSlot: Int, location: Long, status: HintStatus): Boolean {
-        if (_state.value !is SlotState.Connected) return false
-        val packet = ClientPacket.UpdateHint(findingSlot, location, status.value)
-        return socket?.send(listOf(packet)) ?: false
     }
 
     /** Sends [text] as chat message or command. Returns `false` if not connected. */

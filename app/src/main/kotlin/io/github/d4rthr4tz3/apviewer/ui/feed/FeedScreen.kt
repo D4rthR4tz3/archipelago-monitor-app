@@ -105,7 +105,6 @@ fun FeedRoute(multiworldId: String, onBack: () -> Unit, onEdit: () -> Unit) {
                 onDirectionChange = hintsViewModel::setDirection,
                 onSlotChange = hintsViewModel::setSlot,
                 onHideFoundChange = hintsViewModel::setHideFound,
-                onStatusChange = { hint, status -> hintsViewModel.updateStatus(hint, status) },
                 modifier = modifier,
             )
         },

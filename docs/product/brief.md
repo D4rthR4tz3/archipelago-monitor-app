@@ -9,7 +9,7 @@ build order in [roadmap.md](roadmap.md).
 Private Android app that connects to Archipelago servers and sends notifications as soon as one of
 my slots receives an item.
 
-- Several multiworlds (address, port, optional room password), each with n slots of mine.
+- Several multiworlds (address, port, optional server password; Archipelago has one password per room, not per slot), each with n slots of mine.
 - Connections keep running in the background.
 - Text client per multiworld: feed of all exchanged items, chat, commands.
 - Hints per multiworld: item, receiver, location, finder, entrance, status.
@@ -30,7 +30,7 @@ my slots receives an item.
 - IDs to names via the data package; the game of each player comes from `slot_info`. Cache the data
   package per game and invalidate it with the checksums from `RoomInfo`.
 - Feed from `PrintJSON` (`data` parts: `player_id`, `item_id`, `location_id`, ...). Chat and
-  commands via `Say`. Hint status can only be changed by the receiver (`UpdateHint`).
+  commands via `Say`. The app shows the hint status but does not change it.
 - Item flags: `0b001` progression, `0b010` useful, `0b100` trap (none: filler).
 - Android: foreground service (`foregroundServiceType="specialUse"`), `POST_NOTIFICATIONS` from
   Android 13, reconnect with backoff plus ping, try `wss://` before `ws://`, support per-message
@@ -43,5 +43,5 @@ my slots receives an item.
 ## Open points
 
 - "Received items" tab per slot.
-- Item type filter for the feed (sheet) and status menu for hints are not designed yet.
+- Item type filter for the feed (sheet) is not designed yet.
 - Empty, loading and error states are not designed yet.

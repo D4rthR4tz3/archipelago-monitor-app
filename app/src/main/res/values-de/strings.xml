@@ -54,8 +54,8 @@
     <string name="filter_from_me">Von mir</string>
     <string name="filter_chat">Chat</string>
     <string name="filter_item_types">Nach Item-Typ filtern</string>
-    <string name="hints_receive">Ich empfange</string>
-    <string name="hints_find">Ich finde</string>
+    <string name="hints_receive">Für mich</string>
+    <string name="hints_find">Von mir</string>
     <string name="hints_all_slots">Alle meine Slots</string>
     <string name="hints_hide_found">Gefundene ausblenden</string>
     <string name="hints_item">Item</string>
@@ -64,7 +64,6 @@
     <string name="hints_location">Location</string>
     <string name="hints_entrance">Entrance</string>
     <string name="hints_status">Status</string>
-    <string name="hints_change_status">Status ändern: %1$s</string>
     <string name="hints_sort_by">Nach %1$s sortieren</string>
     <string name="hints_empty">Keine Hints.</string>
     <string name="hints_offline">Hints erscheinen, sobald die Multiworld verbunden ist.</string>
@@ -90,7 +89,7 @@
     <string name="edit_name">Name</string>
     <string name="edit_host">Server-Adresse</string>
     <string name="edit_port">Port</string>
-    <string name="edit_room_password">Raum-Passwort (optional)</string>
+    <string name="edit_room_password">Server-Passwort (optional)</string>
     <string name="password_none">Kein Passwort</string>
     <string name="password_show">Passwort anzeigen</string>
     <string name="password_hide">Passwort verbergen</string>
@@ -106,7 +105,7 @@
     <string name="edit_add_slot">Slot manuell hinzufügen</string>
     <string name="edit_add_named_slot">%1$s hinzufügen</string>
     <string name="edit_other_slots">Weitere Slots dieser Multiworld</string>
-    <string name="edit_other_slots_hint">Vom Server gemeldet. Ein Passwort ist nur nötig, wenn der Slot eines hat.</string>
+    <string name="edit_other_slots_hint">Vom Server gemeldet. Mit + fügst du einen als eigenen Slot hinzu.</string>
     <string name="edit_search_slots">Slot oder Spiel suchen</string>
     <plurals name="edit_show_all">
         <item quantity="one">%d anzeigen</item>
@@ -131,7 +130,6 @@
     <string name="slot_connected_hint">Läuft parallel zu deinem Spielclient</string>
     <string name="slot_access">Zugang</string>
     <string name="slot_name">Slotname</string>
-    <string name="slot_password">Slot-Passwort (optional)</string>
     <string name="slot_highlight">Im Feed hervorheben</string>
     <string name="slot_highlight_hint">Findings für und von diesem Slot</string>
     <string name="slot_notifications">Benachrichtigungen bei erhaltenen Items</string>

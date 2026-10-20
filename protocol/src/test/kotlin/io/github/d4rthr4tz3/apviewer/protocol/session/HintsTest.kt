@@ -137,11 +137,9 @@ class HintsTest {
         assertEquals(HintStatus.PRIORITY, fromSamus.hint.status)
         assertTrue(fromSamus.receiverIsOwn)
         assertFalse(fromSamus.finderIsOwn)
-        assertTrue(fromSamus.editable)
         val forSamus = hints[2]
         assertFalse(forSamus.receiverIsOwn)
         assertTrue(forSamus.finderIsOwn)
-        assertFalse(forSamus.editable)
     }
 
     @Test
@@ -153,27 +151,6 @@ class HintsTest {
         runCurrent()
 
         assertEquals(emptyList(), session.hints.first())
-    }
-
-    @Test
-    fun `sends status updates from the receiving slot`() = runTest {
-        val session = session()
-        val (link, zelda) = connect(session)
-        zelda.receive(
-            ServerPacket.Retrieved(
-                mapOf("_read_hints_0_3" to JsonArray(listOf(hintJson(3, 2, 9)))),
-            ),
-        )
-        runCurrent()
-        val hint = session.hints.first().single().hint
-
-        assertTrue(session.updateHint(hint, HintStatus.AVOID))
-
-        assertEquals(
-            listOf(ClientPacket.UpdateHint(player = 2, location = 9, status = 20)),
-            zelda.sentOf<ClientPacket.UpdateHint>(),
-        )
-        assertEquals(emptyList(), link.sentOf<ClientPacket.UpdateHint>())
     }
 
     @Test
@@ -190,22 +167,7 @@ class HintsTest {
         session.stop()
 
         assertEquals(emptyList(), session.hints.first())
-        assertFalse(session.updateHint(sampleHint(), HintStatus.AVOID))
     }
-
-    private fun sampleHint() = SlotHint(
-        receivingSlot = 1,
-        receiverName = "Link",
-        findingSlot = 2,
-        finderName = "Samus",
-        itemId = 7,
-        itemName = "Item 7",
-        itemFlags = 1,
-        locationId = 5,
-        locationName = "Location 5",
-        entrance = "",
-        status = HintStatus.UNSPECIFIED,
-    )
 
     private fun Hint.Companion.of(json: JsonElement): Hint =
         listFrom(JsonArray(listOf(json))).single()
