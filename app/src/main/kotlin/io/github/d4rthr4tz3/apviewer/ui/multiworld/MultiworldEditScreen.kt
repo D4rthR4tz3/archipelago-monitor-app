@@ -391,6 +391,7 @@ private fun OtherSlotsSection(players: List<RoomPlayer>, onAdd: (String) -> Unit
             onValueChange = { query = it },
             modifier = Modifier.fillMaxWidth(),
             placeholder = stringResource(R.string.edit_search_slots),
+            height = 44.dp,
         )
         Column {
             shown.forEachIndexed { index, player ->

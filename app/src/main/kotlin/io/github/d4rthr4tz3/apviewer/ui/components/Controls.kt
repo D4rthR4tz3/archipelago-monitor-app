@@ -4,6 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -30,20 +32,22 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.d4rthr4tz3.apviewer.ui.theme.ApColors
 import io.github.d4rthr4tz3.apviewer.ui.theme.GeistMono
@@ -160,7 +164,11 @@ fun LabeledTextField(
     }
 }
 
-/** Single-line field: surface background, gray border, 8 dp corners. */
+/**
+ * Single-line field: surface background, gray border, 8 dp corners, [height] high. Built on
+ * [BasicTextField] because [androidx.compose.material3.OutlinedTextField] enforces its own minimum
+ * height and padding, which made it taller than the controls next to it.
+ */
 @Composable
 fun ApTextField(
     value: String,
@@ -169,39 +177,67 @@ fun ApTextField(
     placeholder: String? = null,
     textStyle: TextStyle = MaterialTheme.typography.bodyMedium,
     enabled: Boolean = true,
+    height: Dp = 48.dp,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     trailingIcon: (@Composable () -> Unit)? = null,
 ) {
-    OutlinedTextField(
+    val interactionSource = remember { MutableInteractionSource() }
+    val colors = OutlinedTextFieldDefaults.colors(
+        focusedContainerColor = ApColors.Surface,
+        unfocusedContainerColor = ApColors.Surface,
+        disabledContainerColor = ApColors.Surface,
+        focusedBorderColor = ApColors.TextSecondary,
+        unfocusedBorderColor = ApColors.InputBorder,
+        disabledBorderColor = ApColors.InputBorder,
+        focusedPlaceholderColor = ApColors.TextTertiary,
+        unfocusedPlaceholderColor = ApColors.TextTertiary,
+        disabledPlaceholderColor = ApColors.TextTertiary,
+        focusedTextColor = ApColors.TextPrimary,
+        unfocusedTextColor = ApColors.TextPrimary,
+        disabledTextColor = ApColors.TextSecondary,
+        cursorColor = ApColors.TextPrimary,
+    )
+    BasicTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier.heightIn(min = 48.dp),
+        modifier = modifier.height(height),
         enabled = enabled,
-        textStyle = textStyle,
-        placeholder = placeholder?.let { { Text(text = it, style = textStyle) } },
-        singleLine = true,
-        visualTransformation = visualTransformation,
+        textStyle = textStyle.copy(
+            color = if (enabled) ApColors.TextPrimary else ApColors.TextSecondary,
+        ),
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
-        trailingIcon = trailingIcon,
-        shape = MaterialTheme.shapes.small,
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = ApColors.Surface,
-            unfocusedContainerColor = ApColors.Surface,
-            disabledContainerColor = ApColors.Surface,
-            focusedBorderColor = ApColors.TextSecondary,
-            unfocusedBorderColor = ApColors.InputBorder,
-            disabledBorderColor = ApColors.InputBorder,
-            focusedPlaceholderColor = ApColors.TextTertiary,
-            unfocusedPlaceholderColor = ApColors.TextTertiary,
-            disabledPlaceholderColor = ApColors.TextTertiary,
-            focusedTextColor = ApColors.TextPrimary,
-            unfocusedTextColor = ApColors.TextPrimary,
-            disabledTextColor = ApColors.TextSecondary,
-            cursorColor = ApColors.TextPrimary,
-        ),
+        singleLine = true,
+        visualTransformation = visualTransformation,
+        interactionSource = interactionSource,
+        cursorBrush = SolidColor(ApColors.TextPrimary),
+        decorationBox = { innerTextField ->
+            OutlinedTextFieldDefaults.DecorationBox(
+                value = value,
+                innerTextField = innerTextField,
+                enabled = enabled,
+                singleLine = true,
+                visualTransformation = visualTransformation,
+                interactionSource = interactionSource,
+                placeholder = placeholder?.let { { Text(text = it, style = textStyle) } },
+                trailingIcon = trailingIcon,
+                colors = colors,
+                contentPadding = PaddingValues(horizontal = 12.dp),
+                container = {
+                    OutlinedTextFieldDefaults.Container(
+                        enabled = enabled,
+                        isError = false,
+                        interactionSource = interactionSource,
+                        colors = colors,
+                        shape = MaterialTheme.shapes.small,
+                        focusedBorderThickness = 1.dp,
+                        unfocusedBorderThickness = 1.dp,
+                    )
+                },
+            )
+        },
     )
 }
 
