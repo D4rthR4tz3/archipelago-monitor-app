@@ -46,6 +46,8 @@ data class FeedMessage(
     val receivingSlot: Int? = null,
     val item: NetworkItem? = null,
     val highlight: FeedHighlight = FeedHighlight.NONE,
+    /** Slot the message is from, such as the writer of a chat message; `null` if none. */
+    val sendingSlot: Int? = null,
 ) {
     val plainText: String get() = segments.joinToString(separator = "") { it.text }
 
@@ -62,6 +64,7 @@ class MessageRenderer(private val ownSlots: Set<Int>) {
         receivingSlot = packet.receiving,
         item = packet.item,
         highlight = highlightOf(packet),
+        sendingSlot = packet.slot,
     )
 
     private fun highlightOf(packet: ServerPacket.PrintJson): FeedHighlight {
