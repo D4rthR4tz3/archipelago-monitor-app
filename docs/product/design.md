@@ -80,3 +80,12 @@ rules and tokens that apply everywhere.
 | SlotSettings  | Slot status, access (slot name; the password is per room), feed highlight, notifications per item type (off / silent / sound), extras (own world items, new hints, chat mentions), synchronization (last reported item index, "count from now"), remove |
 | Notifications | Ongoing service notification, grouped item notifications with item name colored, hint notification with "mark as priority" action |
 | Legende       | Color legend |
+
+## Launcher icon
+
+Motif "Feed": three feed rows, each with an item marker (own slot, progression, filler) on the
+background `#141414`. Source: [icon.svg](icon.svg), a 108 dp adaptive icon layer; launchers show
+the inner 72 dp and the artwork stays inside the 66 dp safe zone. The app uses the vector
+resources `ic_launcher_foreground` and `ic_launcher_monochrome` (themed icons) via
+`mipmap-anydpi`. The PNGs in `mipmap-*dpi` and `ic_launcher-playstore.png` (512 px) are rendered
+from the SVG; re-render them when the icon changes.
