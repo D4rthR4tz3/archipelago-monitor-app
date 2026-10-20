@@ -109,9 +109,9 @@ fun HintsList(
                 )
             }
         } else {
-            // Each tab is a list of its own that starts at the top; with a shared list state, a
-            // hint shown in both tabs would keep its position and scroll the other list.
-            key(state.direction) {
+            // Each tab and slot filter is a list of its own that starts at the top; with a shared
+            // list state, a hint shown in both lists would keep its position and scroll the other.
+            key(state.direction, state.slot) {
                 LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth()) {
                     items(state.visible, key = { it.key }) { hint ->
                         HintRow(hint = hint)
@@ -193,7 +193,7 @@ private fun HintRow(hint: MultiworldHint) {
             Text(
                 text = data.itemName,
                 modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
+                style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 18.sp),
                 color = itemStyle.color,
                 fontWeight = itemStyle.weight,
                 maxLines = 1,
