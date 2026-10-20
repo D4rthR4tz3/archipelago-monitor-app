@@ -2,10 +2,10 @@
 
 AP Monitor is an Android app that keeps an eye on your [Archipelago](https://archipelago.gg)
 multiworlds. Add as many multiworlds as you like, each with your own slots; the app connects every
-slot as a tracker (it never sends checks, so it runs next to your game client) and notifies you when
-one of your slots receives an item, someone hints an item for you or a chat message names you. Each
-multiworld has a live text client with items, hints, chat and join/leave events, names resolved and
-colored like in the Archipelago text client, plus a hint list and the items each slot received.
+slot as a tracker next to your game client and notifies you when one of your slots receives an item,
+someone hints an item for you or a chat message names you. Each multiworld has a live text client
+with items, hints, chat and join/leave events, names resolved and colored like in the Archipelago
+text client, plus a hint list and the items each slot received.
 
 ## Features
 
@@ -25,6 +25,30 @@ colored like in the Archipelago text client, plus a hint list and the items each
   (off, silent or with sound per item type), new hints and chat mentions. While the app is visible
   it posts no notifications.
 - Reconnects with backoff, pauses without a network and reconnects as soon as it is back.
+
+## Notifications
+
+Notifications need all of the following:
+
+- **Permission:** allow notifications when the app asks on first start (Android 13 and newer), or
+  later in the system settings. The channels "Items with sound", "Items without sound", "New hints"
+  and "Chat mentions" must stay on.
+- **Background connection:** "Keep connected in the background" is on in the multiworld settings
+  (the default). Multiworlds without it disconnect as soon as you leave the app. While at least one
+  multiworld stays connected, an ongoing status notification shows the connected slots.
+- **Connections active:** the switch on the overview is on. "Pause" in the status notification
+  turns it off.
+- **Slot settings:** each slot decides per item type whether to notify (off, silent or with sound;
+  by default progression and traps with sound, useful items silent, filler off) and whether new
+  hints and chat mentions notify (both on by default). Items a slot finds in its own world notify
+  only if "Items from your own world" is on.
+- **Network:** without a network the app waits and reconnects as soon as one is back.
+
+While the app is visible it posts no notifications; the feed shows everything. Hints created while
+a slot was not connected do not notify, and items notify only once, even after a reconnect.
+
+Some manufacturers stop background apps despite the ongoing notification. If notifications stop
+arriving, set the app's battery usage to "Unrestricted" in the system settings.
 
 ## Modules
 
