@@ -268,6 +268,24 @@ class SlotConnectionTest {
     }
 
     @Test
+    fun `retryNow ends the wait before the next attempt`() = runTest {
+        val connection = connection()
+        connection.start()
+        runCurrent()
+        factory.last.receive(TestRoom.roomInfo, TestRoom.connected(slot = 1))
+        runCurrent()
+        factory.last.drop()
+        runCurrent()
+        assertIs<SlotState.Reconnecting>(connection.state.value)
+
+        assertTrue(connection.retryNow())
+        runCurrent()
+
+        assertEquals(2, factory.sockets.size)
+        assertFalse(connection.retryNow())
+    }
+
+    @Test
     fun `fails without retry when the slot is refused`() = runTest {
         val connection = connection()
         connection.start()

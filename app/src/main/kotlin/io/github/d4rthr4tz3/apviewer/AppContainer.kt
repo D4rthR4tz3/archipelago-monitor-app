@@ -1,6 +1,8 @@
 package io.github.d4rthr4tz3.apviewer
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
 import io.github.d4rthr4tz3.apviewer.data.FeedRepository
 import io.github.d4rthr4tz3.apviewer.data.ProfilesRepository
 import io.github.d4rthr4tz3.apviewer.data.RoomDataPackageCache
@@ -51,6 +53,12 @@ class AppContainer(context: Context) {
             feed.prune(profiles.profiles.first().multiworlds)
             profiles.profiles.collect { sessions.update(it) }
         }
+        // Waiting out the backoff after the network is back would delay messages for no reason.
+        context.getSystemService(ConnectivityManager::class.java)?.registerDefaultNetworkCallback(
+            object : ConnectivityManager.NetworkCallback() {
+                override fun onAvailable(network: Network) = sessions.retryNow()
+            },
+        )
     }
 
     private companion object {
