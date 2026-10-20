@@ -39,7 +39,7 @@ Notifications need all of the following:
 - **Connections active:** the switch on the overview is on. "Pause" in the status notification
   turns it off.
 - **Slot settings:** each slot decides per item type whether to notify (off, silent or with sound;
-  by default progression and traps with sound, useful items silent, filler off) and whether new
+  by default progression with sound, useful items silent, filler and traps off) and whether new
   hints and chat mentions notify (both on by default). Items a slot finds in its own world notify
   only if "Items from your own world" is on.
 - **Network:** without a network the app waits and reconnects as soon as one is back.

@@ -33,7 +33,7 @@ data class SlotNotifications(
     val progression: NotifyMode = NotifyMode.SOUND,
     val useful: NotifyMode = NotifyMode.SILENT,
     val filler: NotifyMode = NotifyMode.OFF,
-    val trap: NotifyMode = NotifyMode.SOUND,
+    val trap: NotifyMode = NotifyMode.OFF,
     /** Also notify for items the slot found in its own world. */
     val ownWorld: Boolean = false,
     /** Notify when someone hints an item for this slot. */
