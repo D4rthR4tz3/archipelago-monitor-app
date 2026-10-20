@@ -132,12 +132,11 @@ fun FeedRoute(multiworldId: String, onBack: () -> Unit, onEdit: () -> Unit) {
                 modifier = modifier,
             )
         },
-        hintsTable = {
+        hintsTable = { modifier ->
             HintsTable(
-                name = state.name,
                 state = hints,
                 onSortChange = hintsViewModel::setSortColumn,
-                onBack = onBack,
+                modifier = modifier,
             )
         },
         itemsList = { modifier, active, onOpenItemFilter ->
@@ -158,7 +157,7 @@ fun FeedRoute(multiworldId: String, onBack: () -> Unit, onEdit: () -> Unit) {
 /**
  * Text client of a multiworld: the room's messages, filters and the chat input, the Hints tab with
  * [hintsList] and the Items tab with [itemsList]. Swiping left or right moves between the tabs. In
- * landscape the Hints tab fills the screen with [hintsTable].
+ * landscape the Hints tab shows [hintsTable] instead of [hintsList].
  */
 @Composable
 fun FeedScreen(
@@ -174,7 +173,7 @@ fun FeedScreen(
     onConnect: () -> Unit,
     onDisconnect: () -> Unit,
     hintsList: @Composable (Modifier) -> Unit,
-    hintsTable: @Composable () -> Unit,
+    hintsTable: @Composable (Modifier) -> Unit,
     itemsList: @Composable (Modifier, active: Boolean, onOpenItemFilter: () -> Unit) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -183,27 +182,25 @@ fun FeedScreen(
     var showItemFilter by rememberSaveable { mutableStateOf(false) }
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        if (pagerState.settledPage == MultiworldTab.HINTS.ordinal && maxWidth > maxHeight) {
-            hintsTable()
-        } else {
-            FeedColumn(
-                state = state,
-                pagerState = pagerState,
-                priorityHints = priorityHints,
-                unseenItems = unseenItems,
-                onTabChange = { scope.launch { pagerState.animateScrollToPage(it.ordinal) } },
-                onBack = onBack,
-                onEdit = onEdit,
-                onFilterChange = onFilterChange,
-                onOpenItemFilter = { showItemFilter = true },
-                onSendAsChange = onSendAsChange,
-                onSay = onSay,
-                onConnect = onConnect,
-                onDisconnect = onDisconnect,
-                hintsList = hintsList,
-                itemsList = itemsList,
-            )
-        }
+        // The header and the tabs stay in landscape too, so every tab can still be reached.
+        val wide = maxWidth > maxHeight
+        FeedColumn(
+            state = state,
+            pagerState = pagerState,
+            priorityHints = priorityHints,
+            unseenItems = unseenItems,
+            onTabChange = { scope.launch { pagerState.animateScrollToPage(it.ordinal) } },
+            onBack = onBack,
+            onEdit = onEdit,
+            onFilterChange = onFilterChange,
+            onOpenItemFilter = { showItemFilter = true },
+            onSendAsChange = onSendAsChange,
+            onSay = onSay,
+            onConnect = onConnect,
+            onDisconnect = onDisconnect,
+            hintsList = if (wide) hintsTable else hintsList,
+            itemsList = itemsList,
+        )
     }
     if (showItemFilter) {
         ItemFilterSheet(
