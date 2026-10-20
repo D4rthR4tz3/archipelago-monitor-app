@@ -41,14 +41,6 @@ sealed interface ClientPacket {
     @SerialName("SetNotify")
     data class SetNotify(val keys: List<String>) : ClientPacket
 
-    /**
-     * Sets the [status] of the hint for [location] in the world of [player]. Only the hint's
-     * receiving player may do this, and found hints cannot be changed.
-     */
-    @Serializable
-    @SerialName("UpdateHint")
-    data class UpdateHint(val player: Int, val location: Long, val status: Int) : ClientPacket
-
     /** Asks the server to resend all received items. */
     @Serializable
     @SerialName("Sync")

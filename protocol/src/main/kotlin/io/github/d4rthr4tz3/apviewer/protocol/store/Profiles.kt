@@ -60,8 +60,6 @@ data class SlotNotifications(
 @Serializable
 data class SavedSlot(
     val name: String,
-    /** Overrides the room password for this slot if not empty. */
-    val password: String = "",
     /** Whether items for and from this slot are highlighted in the feed. */
     val highlight: Boolean = true,
     val notifications: SlotNotifications = SlotNotifications(),
@@ -95,7 +93,7 @@ data class SavedMultiworld(
         address = address,
         roomPassword = roomPassword,
         slots = slots.map {
-            SlotConfig(name = it.name, password = it.password, highlight = it.highlight)
+            SlotConfig(name = it.name, highlight = it.highlight)
         },
     )
 

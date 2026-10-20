@@ -1,7 +1,6 @@
 package io.github.d4rthr4tz3.apviewer.protocol.session
 
 import io.github.d4rthr4tz3.apviewer.protocol.client.PacketSocketFactory
-import io.github.d4rthr4tz3.apviewer.protocol.model.HintStatus
 import io.github.d4rthr4tz3.apviewer.protocol.monitor.FeedEntry
 import io.github.d4rthr4tz3.apviewer.protocol.store.DataPackageCache
 import io.github.d4rthr4tz3.apviewer.protocol.store.ItemIndexStore
@@ -100,10 +99,6 @@ class SessionManager(
         .distinctUntilChanged()
         .flatMapLatest { session -> session?.hints ?: flowOf(emptyList()) }
         .distinctUntilChanged()
-
-    /** Sets the [status] of [hint] in multiworld [id]. Returns `false` if not sent. */
-    fun updateHint(id: String, hint: SlotHint, status: HintStatus): Boolean =
-        _sessions.value[id]?.updateHint(hint, status) ?: false
 
     /** Combined connection state of the multiworld with [id]. */
     @OptIn(ExperimentalCoroutinesApi::class)

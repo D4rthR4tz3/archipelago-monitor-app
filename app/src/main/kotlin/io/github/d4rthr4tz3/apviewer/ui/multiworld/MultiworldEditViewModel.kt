@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
 /** The editable settings of a multiworld, saved only with [MultiworldEditViewModel.save]. */
 data class MultiworldDraft(
     val name: String = "",
-    val host: String = "",
+    val host: String = DEFAULT_HOST,
     val port: String = SlotConnection.DEFAULT_PORT.toString(),
     val roomPassword: String = "",
     val slots: List<SavedSlot> = emptyList(),
@@ -42,6 +42,11 @@ data class MultiworldDraft(
     val address: String get() = ServerAddress(host, port).toString()
 
     val canSave: Boolean get() = host.isNotBlank()
+
+    companion object {
+        /** Host of the public Archipelago server, where most rooms run. */
+        const val DEFAULT_HOST = "archipelago.gg"
+    }
 }
 
 sealed interface ProbeState {

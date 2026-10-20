@@ -34,13 +34,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -68,7 +65,6 @@ fun HintsList(
     onDirectionChange: (HintDirection) -> Unit,
     onSlotChange: (String?) -> Unit,
     onHideFoundChange: (Boolean) -> Unit,
-    onStatusChange: (SlotHint, HintStatus) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -115,7 +111,7 @@ fun HintsList(
         } else {
             LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth()) {
                 items(state.visible, key = { it.key }) { hint ->
-                    HintRow(hint = hint, onStatusChange = { onStatusChange(hint.hint, it) })
+                    HintRow(hint = hint)
                     HorizontalDivider(color = ApColors.Divider)
                 }
             }
@@ -216,7 +212,7 @@ private fun HideFoundSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit
 }
 
 @Composable
-private fun HintRow(hint: MultiworldHint, onStatusChange: (HintStatus) -> Unit) {
+private fun HintRow(hint: MultiworldHint) {
     val data = hint.hint
     val itemStyle = itemClassStyle(ItemClass.of(data.itemFlags))
     Column(
@@ -237,15 +233,11 @@ private fun HintRow(hint: MultiworldHint, onStatusChange: (HintStatus) -> Unit) 
                 overflow = TextOverflow.Ellipsis,
             )
             Box(modifier = Modifier.width(104.dp), contentAlignment = Alignment.CenterEnd) {
-                if (hint.editable) {
-                    StatusButton(status = data.status, onSelect = onStatusChange)
-                } else {
-                    Text(
-                        text = hintStatusLabel(data.status),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = hintStatusColor(data.status),
-                    )
-                }
+                Text(
+                    text = hintStatusLabel(data.status),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = hintStatusColor(data.status),
+                )
             }
         }
         Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
@@ -292,50 +284,6 @@ private fun HintDetail(label: String, value: String, color: Color) {
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
-    }
-}
-
-@Composable
-private fun StatusButton(status: HintStatus, onSelect: (HintStatus) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    val description = stringResource(R.string.hints_change_status, hintStatusLabel(status))
-    Box {
-        Row(
-            modifier = Modifier
-                .height(28.dp)
-                .clip(MaterialTheme.shapes.extraSmall)
-                .clickable(role = Role.DropdownList) { expanded = true }
-                .semantics { contentDescription = description }
-                .padding(start = 8.dp, end = 2.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = hintStatusLabel(status),
-                style = MaterialTheme.typography.labelMedium,
-                color = hintStatusColor(status),
-            )
-            Icon(
-                painter = painterResource(R.drawable.ic_arrow_drop_down),
-                contentDescription = null,
-                tint = hintStatusColor(status),
-                modifier = Modifier.size(18.dp),
-            )
-        }
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            containerColor = ApColors.Surface,
-        ) {
-            selectableHintStatuses.forEach { option ->
-                DropdownMenuItem(
-                    text = { Text(hintStatusLabel(option), color = hintStatusColor(option)) },
-                    onClick = {
-                        expanded = false
-                        if (option != status) onSelect(option)
-                    },
-                )
-            }
-        }
     }
 }
 
@@ -561,7 +509,6 @@ private fun HintsListPreview() {
             onDirectionChange = {},
             onSlotChange = {},
             onHideFoundChange = {},
-            onStatusChange = { _, _ -> },
         )
     }
 }
