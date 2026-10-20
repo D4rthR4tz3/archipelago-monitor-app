@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connect_title">Mit einem Raum verbinden</string>
+    <string name="connect_address">Serveradresse</string>
+    <string name="connect_slot_name">Slot-Name</string>
+    <string name="connect_password">Passwort (optional)</string>
+    <string name="connect_button">Verbinden</string>
+    <string name="connect_connecting">Verbinde mit %1$s…</string>
+
+    <string name="error_unreachable">Server nicht erreichbar.</string>
+    <string name="error_unreachable_detail">Server nicht erreichbar: %1$s</string>
+    <string name="error_connection_lost">Verbindung verloren.</string>
+    <string name="error_connection_lost_detail">Verbindung verloren: %1$s</string>
+    <string name="error_refused">Verbindung abgelehnt: %1$s</string>
+    <string name="error_invalid_slot">unbekannter Slot-Name</string>
+    <string name="error_invalid_password">falsches Passwort</string>
+    <string name="error_incompatible_version">inkompatible Version</string>
+
+    <string name="feed_seed">Seed %1$s · Server %2$s</string>
+    <string name="feed_empty">Noch keine Nachrichten.</string>
+    <string name="feed_disconnect">Trennen</string>
+</resources>
