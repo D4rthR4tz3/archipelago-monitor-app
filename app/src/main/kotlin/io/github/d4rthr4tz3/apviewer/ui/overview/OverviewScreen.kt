@@ -317,11 +317,7 @@ private fun MultiworldSummary(
                 },
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.bodySmall,
-                color = when {
-                    noSlots -> ApColors.Warning
-                    disconnected -> ApColors.TextTertiary
-                    else -> ApColors.TextSecondary
-                },
+                color = if (disconnected) ApColors.TextTertiary else ApColors.TextSecondary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
