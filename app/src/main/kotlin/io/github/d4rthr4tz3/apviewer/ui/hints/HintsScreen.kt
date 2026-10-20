@@ -69,10 +69,20 @@ fun HintsList(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             SegmentedControl(
-                options = listOf(
-                    HintDirection.RECEIVE to stringResource(R.string.hints_receive),
-                    HintDirection.FIND to stringResource(R.string.hints_find),
-                ),
+                options = HintDirection.entries.map { direction ->
+                    val label = stringResource(
+                        when (direction) {
+                            HintDirection.FIND -> R.string.hints_find
+                            HintDirection.RECEIVE -> R.string.hints_receive
+                        },
+                    )
+                    val open = state.openCounts[direction] ?: 0
+                    direction to if (open > 0) {
+                        "$label ${stringResource(R.string.tab_count, open)}"
+                    } else {
+                        label
+                    }
+                },
                 selected = state.direction,
                 onSelect = onDirectionChange,
                 modifier = Modifier.fillMaxWidth(),

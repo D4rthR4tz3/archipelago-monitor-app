@@ -87,6 +87,7 @@ fun ItemsList(
         ) {
             ItemSlotPicker(
                 slotNames = state.slotNames,
+                newCounts = state.newCounts,
                 selected = state.slot,
                 onSelect = onSlotChange,
                 modifier = Modifier.weight(1f),
@@ -153,6 +154,7 @@ fun ItemsList(
 @Composable
 private fun ItemSlotPicker(
     slotNames: List<String>,
+    newCounts: Map<String, Int>,
     selected: String?,
     onSelect: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -193,8 +195,23 @@ private fun ItemSlotPicker(
             containerColor = ApColors.Surface,
         ) {
             slotNames.forEach { name ->
+                val newCount = newCounts[name] ?: 0
                 DropdownMenuItem(
-                    text = { Text(name, color = ApColors.TextPrimary) },
+                    text = {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(name, color = ApColors.TextPrimary)
+                            if (newCount > 0) {
+                                Text(
+                                    text = stringResource(R.string.new_count, newCount),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = ApColors.TextSecondary,
+                                )
+                            }
+                        }
+                    },
                     onClick = {
                         onSelect(name)
                         expanded = false
@@ -289,6 +306,7 @@ private fun ItemsListPreview() {
             state = ItemsState(
                 connected = true,
                 slotNames = listOf("D4rth_Keymizer", "D4rth_Doorsmizer"),
+                newCounts = mapOf("D4rth_Keymizer" to 2, "D4rth_Doorsmizer" to 5),
                 slot = "D4rth_Keymizer",
                 rows = listOf(
                     row(141, "Small Heart", 0, "hellow-oos", "Chest in Summer Cave", true),

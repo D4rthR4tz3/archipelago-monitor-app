@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
-/** Which side of a hint the user is on. */
-enum class HintDirection { RECEIVE, FIND }
+/** Which side of a hint the user is on, in the order of the sub-tabs. */
+enum class HintDirection { FIND, RECEIVE }
 
 /** Columns of the hint table, each sortable. */
 enum class HintColumn { ITEM, RECEIVER, LOCATION, FINDER, ENTRANCE, STATUS }
@@ -25,9 +25,11 @@ data class HintsState(
     val visible: List<MultiworldHint> = emptyList(),
     /** All hints, sorted by [sortColumn], for the table. */
     val table: List<MultiworldHint> = emptyList(),
-    /** Number of hints the user receives with priority that are not found yet. */
-    val priorityCount: Int = 0,
-    val direction: HintDirection = HintDirection.RECEIVE,
+    /** Number of hints of all of the user's slots that are not found yet, for the tab. */
+    val openCount: Int = 0,
+    /** Number of hints not found yet in each direction, for the selected slot. */
+    val openCounts: Map<HintDirection, Int> = emptyMap(),
+    val direction: HintDirection = HintDirection.FIND,
     /** Slot to show, or `null` for all of the user's slots. */
     val slot: String? = null,
     val sortColumn: HintColumn = HintColumn.STATUS,
@@ -36,7 +38,7 @@ data class HintsState(
 /** Hints of one multiworld, with the list filters and the table sort order. */
 class HintsViewModel(private val container: AppContainer, private val multiworldId: String) :
     ViewModel() {
-    private val direction = MutableStateFlow(HintDirection.RECEIVE)
+    private val direction = MutableStateFlow(HintDirection.FIND)
     private val slot = MutableStateFlow<String?>(null)
     private val sortColumn = MutableStateFlow(HintColumn.STATUS)
 
@@ -61,8 +63,13 @@ class HintsViewModel(private val container: AppContainer, private val multiworld
             slotNames = slotNames,
             visible = sorted.filter { it.matches(current.direction, selected) },
             table = hints.sortedWith(comparatorFor(current.sortColumn)),
-            priorityCount = hints.count {
-                it.receiverIsOwn && it.hint.status == HintStatus.PRIORITY
+            openCount = hints.count {
+                (it.receiverIsOwn || it.finderIsOwn) && it.hint.status != HintStatus.FOUND
+            },
+            openCounts = HintDirection.entries.associateWith { direction ->
+                hints.count {
+                    it.matches(direction, selected) && it.hint.status != HintStatus.FOUND
+                }
             },
             direction = current.direction,
             slot = selected,
