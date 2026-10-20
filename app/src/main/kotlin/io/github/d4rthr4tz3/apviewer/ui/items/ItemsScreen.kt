@@ -34,11 +34,13 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.github.d4rthr4tz3.apviewer.R
 import io.github.d4rthr4tz3.apviewer.protocol.model.ItemFlags
 import io.github.d4rthr4tz3.apviewer.protocol.model.NetworkItem
@@ -248,20 +250,23 @@ private fun ItemListRow(row: ItemRow) {
             .padding(horizontal = 16.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
+        // Number, item and time share the baseline of the item's line, as in the feed.
         Text(
             // The server counts from 0; people count from 1.
             text = stringResource(R.string.items_index, row.item.index + 1),
-            modifier = Modifier.width(40.dp),
-            style = MaterialTheme.typography.labelSmall,
-            fontFamily = GeistMono,
+            modifier = Modifier.width(40.dp).alignByBaseline(),
+            style = MonoLabelStyle,
             color = ApColors.TextTertiary,
         )
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(
+            modifier = Modifier.weight(1f).alignByBaseline(),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            Row {
                 Text(
                     text = row.item.itemName,
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.weight(1f).alignByBaseline(),
+                    style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 18.sp),
                     fontWeight = style.weight,
                     color = style.color,
                     maxLines = 1,
@@ -270,16 +275,15 @@ private fun ItemListRow(row: ItemRow) {
                 row.item.receivedAtMillis?.let { time ->
                     Text(
                         text = formatClock(time),
-                        modifier = Modifier.padding(start = 10.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontFamily = GeistMono,
+                        modifier = Modifier.padding(start = 10.dp).alignByBaseline(),
+                        style = MonoLabelStyle,
                         color = ApColors.TextTertiary,
                     )
                 }
             }
             Text(
                 text = origin,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.labelSmall.copy(lineHeight = 16.sp),
                 color = ApColors.TextTertiary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -287,6 +291,9 @@ private fun ItemListRow(row: ItemRow) {
         }
     }
 }
+
+/** Same size as the feed's time column. */
+private val MonoLabelStyle = TextStyle(fontFamily = GeistMono, fontSize = 11.sp, lineHeight = 18.sp)
 
 @Preview(backgroundColor = 0xFF141414, showBackground = true, widthDp = 390, heightDp = 600)
 @Composable

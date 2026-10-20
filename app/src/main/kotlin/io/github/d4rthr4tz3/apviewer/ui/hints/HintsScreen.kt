@@ -193,7 +193,7 @@ private fun HintRow(hint: MultiworldHint) {
             Text(
                 text = data.itemName,
                 modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
+                style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 18.sp),
                 color = itemStyle.color,
                 fontWeight = itemStyle.weight,
                 maxLines = 1,
