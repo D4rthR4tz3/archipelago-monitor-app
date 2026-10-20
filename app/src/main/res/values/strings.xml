@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">AP Viewer</string>
+
+    <string name="connect_title">Connect to a room</string>
+    <string name="connect_address">Server address</string>
+    <string name="connect_address_hint" translatable="false">archipelago.gg:38281</string>
+    <string name="connect_slot_name">Slot name</string>
+    <string name="connect_password">Password (optional)</string>
+    <string name="connect_button">Connect</string>
+    <string name="connect_connecting">Connecting to %1$s…</string>
+
+    <string name="error_unreachable">Server not reachable.</string>
+    <string name="error_unreachable_detail">Server not reachable: %1$s</string>
+    <string name="error_connection_lost">Connection lost.</string>
+    <string name="error_connection_lost_detail">Connection lost: %1$s</string>
+    <string name="error_refused">Connection refused: %1$s</string>
+    <string name="error_invalid_slot">unknown slot name</string>
+    <string name="error_invalid_password">wrong password</string>
+    <string name="error_incompatible_version">incompatible version</string>
+
+    <string name="feed_seed">Seed %1$s · server %2$s</string>
+    <string name="feed_empty">No messages yet.</string>
+    <string name="feed_disconnect">Disconnect</string>
+</resources>
