@@ -76,6 +76,7 @@
     <string name="feed_connecting_hint">Messages appear once the connection is up.</string>
     <string name="feed_to">" to "</string>
     <string name="feed_themselves">themselves</string>
+    <string name="feed_hint">Hint</string>
     <string name="feed_hint_for">"Hint for "</string>
     <string name="feed_hint_at">" at "</string>
     <string name="filter_all">All</string>

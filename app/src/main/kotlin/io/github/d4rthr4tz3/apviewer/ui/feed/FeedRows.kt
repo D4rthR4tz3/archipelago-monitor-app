@@ -6,13 +6,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -50,12 +53,13 @@ fun itemClassStyle(itemClass: ItemClass): ItemClassStyle = when (itemClass) {
     ItemClass.FILLER -> ItemClassStyle(ContentColors.Filler, FontWeight.Normal)
 }
 
-/** Hints stand out from items; of the items, only those for the user's slots are highlighted. */
-private fun FeedMessage.background(): Color = when {
-    hintParts() != null -> ContentColors.HighlightHint
-    highlight == FeedHighlight.FOR_ME -> ContentColors.HighlightForMe
-    else -> Color.Transparent
-}
+/** Only items for the user's slots are highlighted; hints carry an icon instead. */
+private fun FeedMessage.background(): Color =
+    if (highlight == FeedHighlight.FOR_ME && hintParts() == null) {
+        ContentColors.HighlightForMe
+    } else {
+        Color.Transparent
+    }
 
 private fun FeedMessage.isChat(): Boolean = type == "Chat" || type == "ServerChat"
 
@@ -87,17 +91,29 @@ fun StructuredFeedRow(entry: FeedEntry, modifier: Modifier = Modifier) {
             .padding(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(
-            text = if (entry.receivedAtMillis > 0) formatClock(entry.receivedAtMillis) else "",
-            // On the first line of the message, whatever its text size.
-            modifier = Modifier.width(42.dp).alignByBaseline(),
-            style = MaterialTheme.typography.labelSmall.copy(
-                fontFamily = GeistMono,
-                fontSize = 11.sp,
-                lineHeight = 18.sp,
-            ),
-            color = ApColors.TextTertiary,
-        )
+        // On the first line of the message, whatever its text size.
+        Column(modifier = Modifier.width(42.dp).alignByBaseline()) {
+            Text(
+                text = if (entry.receivedAtMillis > 0) formatClock(entry.receivedAtMillis) else "",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontFamily = GeistMono,
+                    fontSize = 11.sp,
+                    lineHeight = 18.sp,
+                ),
+                color = ApColors.TextTertiary,
+            )
+            if (hint != null) {
+                // Centered on the lines below the item: "Hint for ..." and the location.
+                Icon(
+                    painter = painterResource(R.drawable.ic_info),
+                    contentDescription = stringResource(R.string.feed_hint),
+                    modifier = Modifier
+                        .padding(top = if (hint.location != null) 12.dp else 3.dp)
+                        .size(14.dp),
+                    tint = ApColors.TextTertiary,
+                )
+            }
+        }
         Column(
             modifier = Modifier.alignByBaseline(),
             verticalArrangement = Arrangement.spacedBy(2.dp),
