@@ -1,6 +1,7 @@
 package io.github.d4rthr4tz3.apviewer.protocol.session
 
 import io.github.d4rthr4tz3.apviewer.protocol.client.PacketSocketFactory
+import io.github.d4rthr4tz3.apviewer.protocol.model.HintStatus
 import io.github.d4rthr4tz3.apviewer.protocol.monitor.FeedEntry
 import io.github.d4rthr4tz3.apviewer.protocol.store.DataPackageCache
 import io.github.d4rthr4tz3.apviewer.protocol.store.ItemIndexStore
@@ -8,12 +9,14 @@ import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -86,6 +89,26 @@ class MultiworldSession(
     val receivedItems: SharedFlow<SlotReceivedItem> = _receivedItems.asSharedFlow()
 
     /**
+     * Hints of all connected slots, each hint once. A hint between two of the user's slots is known
+     * to both of them.
+     */
+    val hints: Flow<List<MultiworldHint>> =
+        combine(slots.map { slot -> combine(slot.state, slot.hints, ::Pair) }) { perSlot ->
+            val ownSlots = perSlot.mapNotNull { (state, _) ->
+                (state as? SlotState.Connected)?.info?.slot
+            }.toSet()
+            perSlot.flatMap { (_, hints) -> hints }
+                .distinctBy { it.findingSlot to it.locationId }
+                .map { hint ->
+                    MultiworldHint(
+                        hint = hint,
+                        receiverIsOwn = hint.receivingSlot in ownSlots,
+                        finderIsOwn = hint.findingSlot in ownSlots,
+                    )
+                }
+        }
+
+    /**
      * Connects all slots. The feed is kept across reconnects and cleared only here. Collectors start
      * undispatched so that nothing a slot emits right after connecting is missed.
      */
@@ -122,6 +145,17 @@ class MultiworldSession(
     /** Sends [text] as chat message or command from [slotName]. Returns `false` if not sent. */
     fun say(slotName: String, text: String): Boolean =
         slots.firstOrNull { it.config.slotName == slotName }?.say(text) ?: false
+
+    /**
+     * Sets the [status] of [hint], sent by the connected slot that receives its item. Returns
+     * `false` if no such slot is connected.
+     */
+    fun updateHint(hint: SlotHint, status: HintStatus): Boolean {
+        val receiver = slots.firstOrNull { slot ->
+            (slot.state.value as? SlotState.Connected)?.info?.slot == hint.receivingSlot
+        } ?: return false
+        return receiver.updateHint(hint.findingSlot, hint.locationId, status)
+    }
 
     private fun stopCollectors() {
         collectors.forEach(Job::cancel)
