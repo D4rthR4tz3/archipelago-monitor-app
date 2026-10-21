@@ -29,10 +29,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -240,8 +242,6 @@ private fun ItemListRow(row: ItemRow) {
                 color = if (row.fromSelf) ApColors.TextTertiary else ContentColors.OtherPlayer,
             ),
         ) { append(sender) }
-        append(", ")
-        withStyle(SpanStyle(color = ContentColors.Location)) { append(row.item.locationName) }
     }
     Row(
         modifier = Modifier
@@ -281,15 +281,22 @@ private fun ItemListRow(row: ItemRow) {
                     )
                 }
             }
-            Text(
-                text = origin,
-                style = MaterialTheme.typography.labelSmall.copy(lineHeight = 16.sp),
-                color = ApColors.TextTertiary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            DetailLine(origin, ApColors.TextTertiary)
+            // The location on a line of its own, as in the feed; location names are often long.
+            DetailLine(AnnotatedString(row.item.locationName), ContentColors.Location)
         }
     }
+}
+
+@Composable
+private fun DetailLine(text: AnnotatedString, color: Color) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall.copy(lineHeight = 16.sp),
+        color = color,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
 }
 
 /** Same size as the feed's time column. */

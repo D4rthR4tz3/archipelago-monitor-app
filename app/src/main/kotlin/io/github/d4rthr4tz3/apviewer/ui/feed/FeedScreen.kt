@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
@@ -607,10 +608,15 @@ private fun FeedList(state: FeedState, modifier: Modifier = Modifier) {
         contentPadding = PaddingValues(start = 10.dp, end = 10.dp, bottom = 8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.Bottom),
     ) {
-        items(state.entries, key = { it.id }) { entry ->
+        itemsIndexed(state.entries, key = { _, entry -> entry.id }) { index, entry ->
             when (state.layout) {
                 FeedLayout.CLASSIC -> ClassicFeedRow(entry)
-                FeedLayout.STRUCTURED -> StructuredFeedRow(entry)
+
+                // Divided like the rows of the Hints and Items tabs.
+                FeedLayout.STRUCTURED -> Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    if (index > 0) HorizontalDivider(color = ApColors.Divider)
+                    StructuredFeedRow(entry)
+                }
             }
         }
     }
